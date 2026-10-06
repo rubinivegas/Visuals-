@@ -59,12 +59,18 @@ ARMS AND HANDS (important – get these right):
   syringe held low and pointing down. A hanging hand is NOT palm-out: show it side-on, palm
   toward the thigh, fingers together and gently curled, thumb lying along the index finger.
 - The other arm hangs relaxed with the same bone lengths and a gentle sway.
-- Syringe grip like a clinician: index and middle fingers wrapped behind the finger flange,
-  thumb on the plunger, bending as the plunger is pressed (the hand itself stays put).
+- Syringe held in a dart grip, as for a real injection: the back of the hand above the barrel,
+  the index finger lying along the top of the barrel in three jointed segments with a nail on
+  the tip, the thumb along the near side of the barrel, and the middle, ring and little fingers
+  curled underneath. The plunger end sticks out behind the hand.
 - Hands MUST connect smoothly to the arms: the coat sleeve ends in a cuff, and a skin-coloured
   wrist runs from inside the cuff into the back of the hand, the same width as the hand where
   they meet, with no outline seam across the join.
-- Every human hand has a palm, four fingers and a thumb.
+- Every human hand has a palm, four fingers and a thumb, and every finger stays anatomically
+  correct in every pose: jointed segments, correct lengths (middle longest, little shortest),
+  bending only the way real fingers bend, never splayed or rubbery.
+- Hands are sized to their arms: about as wide as the wrist and roughly 3/4 the length of the
+  forearm. Maya's hands must not look tiny next to her arms.
 
 LOOK – shading and texture on everything:
 - Rooms: soft gradient walls with subtle wallpaper texture, a window with sky and daylight
