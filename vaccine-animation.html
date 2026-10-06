@@ -97,9 +97,9 @@
   .tail { transform-box: view-box; transform-origin: 250px 320px; animation: wag 1.4s ease-in-out infinite; }
   .done .tail { animation-duration: .25s; }
   @keyframes wag { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg); } }
-  .ear-l { transform-box: fill-box; transform-origin: 70% 100%; animation: ear 2s ease-in-out infinite; }
-  .ear-r { transform-box: fill-box; transform-origin: 30% 100%; animation: ear 2s ease-in-out infinite reverse; }
-  @keyframes ear { 50% { transform: rotate(4deg); } }
+  .ear-l { transform-box: fill-box; transform-origin: 80% 70%; animation: ear 2s ease-in-out infinite; }
+  .ear-r { transform-box: fill-box; transform-origin: 20% 70%; animation: ear 2s ease-in-out infinite reverse; }
+  @keyframes ear { 50% { transform: rotate(-4deg); } }
   .heart { animation: floatup 2.2s ease-in infinite; opacity: 0; }
   g:nth-child(2) > .heart { animation-delay: .7s; }
   g:nth-child(3) > .heart { animation-delay: 1.4s; }
@@ -201,33 +201,74 @@
     <!-- puppy (scaled to sit naturally beside an adult) -->
     <g transform="translate(318 372) scale(.7) translate(-318 -372)">
     <!-- Stella: black tricolor Australian Shepherd puppy (black coat, tan brows, cheeks,
-         legs and inner ears, white chest bib and paws, brown eyes, long tail, blue collar) -->
+         legs and inner ears, white chest bib and paws, brown eyes, folded ears, long tail, blue collar) -->
+    <defs>
+      <radialGradient id="stBlack" cx="38%" cy="28%" r="80%">
+        <stop offset="0" stop-color="#454b54"/><stop offset=".55" stop-color="#23262b"/><stop offset="1" stop-color="#121417"/>
+      </radialGradient>
+      <radialGradient id="stTan" cx="40%" cy="30%" r="80%">
+        <stop offset="0" stop-color="#e3a15c"/><stop offset=".6" stop-color="#c9823f"/><stop offset="1" stop-color="#9c5e27"/>
+      </radialGradient>
+      <linearGradient id="stWhite" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ddd5c7"/>
+      </linearGradient>
+      <linearGradient id="stFlap" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3d424a"/><stop offset="1" stop-color="#15171a"/>
+      </linearGradient>
+      <!-- fur strands: short curved strokes tiled over the coat -->
+      <pattern id="stFur" width="29" height="23" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
+        <path d="M3 21 Q5 13 3 6 M11 14 Q13 9 12 3 M18 22 Q20 15 18 10 M24 12 Q26 7 24 1 M7 9 Q8 5 7 2" fill="none" stroke="#ffffff" stroke-opacity=".07" stroke-width="1.2" stroke-linecap="round"/>
+      </pattern>
+      <pattern id="stFurDark" width="16" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-6)">
+        <path d="M2 13 Q4 7 3 1 M9 13 Q10 8 9 2" fill="none" stroke="#5a3412" stroke-opacity=".18" stroke-width="1.2" stroke-linecap="round"/>
+      </pattern>
+    </defs>
+    <!-- soft shadow on the table -->
+    <ellipse cx="318" cy="378" rx="92" ry="10" fill="#000" opacity=".14"/>
     <g>
-      <path class="tail" d="M250 330 Q206 340 190 318 Q180 300 196 296 Q206 318 252 312Z" fill="#23262b"/>
+      <path class="tail" d="M250 330 Q206 346 186 322 Q176 304 192 296 Q204 318 252 312Z" fill="url(#stBlack)"/>
       <g class="breathe">
-        <ellipse cx="318" cy="305" rx="88" ry="72" fill="#23262b"/>
-        <!-- tan along the sides of the chest, white bib down the middle -->
-        <path d="M268 262 Q318 248 368 262 Q376 300 360 332 Q318 350 276 332 Q260 300 268 262Z" fill="#c9823f"/>
-        <path d="M284 256 Q318 248 352 256 Q358 292 344 322 Q332 346 318 352 Q304 346 292 322 Q278 292 284 256Z" fill="#f7f4ee"/>
-        <!-- front legs: black at the top, tan below, white paws -->
-        <rect x="268" y="326" width="34" height="50" rx="16" fill="#23262b"/><rect x="334" y="326" width="34" height="50" rx="16" fill="#23262b"/>
-        <rect x="270" y="340" width="30" height="34" rx="12" fill="#c9823f"/><rect x="336" y="340" width="30" height="34" rx="12" fill="#c9823f"/>
-        <ellipse cx="285" cy="374" rx="20" ry="10" fill="#f7f4ee"/><ellipse cx="351" cy="374" rx="20" ry="10" fill="#f7f4ee"/>
+        <ellipse cx="318" cy="305" rx="88" ry="72" fill="url(#stBlack)"/>
+        <ellipse cx="318" cy="305" rx="88" ry="72" fill="url(#stFur)"/>
+        <!-- tan along the sides of the chest, fluffy white bib down the middle -->
+        <path d="M268 262 Q318 248 368 262 Q376 300 360 332 Q318 350 276 332 Q260 300 268 262Z" fill="url(#stTan)"/>
+        <path d="M268 262 Q318 248 368 262 Q376 300 360 332 Q318 350 276 332 Q260 300 268 262Z" fill="url(#stFurDark)"/>
+        <path d="M284 256 Q318 248 352 256 Q358 292 346 318 Q344 332 336 330 Q334 344 326 340 Q322 354 316 346 Q310 354 306 340 Q298 344 298 330 Q290 332 290 318 Q278 292 284 256Z" fill="url(#stWhite)"/>
+        <path d="M300 280 Q304 290 302 300 M318 284 Q321 296 318 308 M336 280 Q332 290 334 300" fill="none" stroke="#cfc6b6" stroke-width="1.6" stroke-linecap="round"/>
+        <!-- front legs: black at the top, tan below, white paws with toe lines -->
+        <rect x="268" y="326" width="34" height="50" rx="16" fill="url(#stBlack)"/><rect x="334" y="326" width="34" height="50" rx="16" fill="url(#stBlack)"/>
+        <rect x="270" y="340" width="30" height="34" rx="12" fill="url(#stTan)"/><rect x="336" y="340" width="30" height="34" rx="12" fill="url(#stTan)"/>
+        <ellipse cx="285" cy="374" rx="20" ry="10" fill="url(#stWhite)"/><ellipse cx="351" cy="374" rx="20" ry="10" fill="url(#stWhite)"/>
+        <path d="M279 372 L279 380 M291 372 L291 380 M345 372 L345 380 M357 372 L357 380" stroke="#cfc6b6" stroke-width="1.6" stroke-linecap="round"/>
       </g>
-      <!-- soft folded ears, tan inside -->
-      <g class="ear-l"><path d="M258 170 L250 118 Q262 104 298 138Z" fill="#23262b"/><path d="M262 160 L258 128 Q266 120 286 140Z" fill="#c9823f"/><path d="M250 118 Q262 104 276 116 L266 136Z" fill="#15171a"/></g>
-      <g class="ear-r"><path d="M374 170 L382 118 Q370 104 334 138Z" fill="#23262b"/><path d="M370 160 L374 128 Q366 120 346 140Z" fill="#c9823f"/><path d="M382 118 Q370 104 356 116 L366 136Z" fill="#15171a"/></g>
-      <!-- head -->
-      <circle cx="316" cy="190" r="60" fill="#23262b"/>
-      <ellipse cx="292" cy="166" rx="8" ry="5" fill="#c9823f"/><ellipse cx="340" cy="166" rx="8" ry="5" fill="#c9823f"/>
-      <path d="M262 198 Q270 236 302 240 L304 214 Q284 214 270 196Z" fill="#c9823f"/>
-      <path d="M370 198 Q362 236 330 240 L328 214 Q348 214 362 196Z" fill="#c9823f"/>
-      <ellipse cx="316" cy="219" rx="25" ry="19" fill="#c9823f"/>
+      <!-- head with fluffy cheek tufts -->
+      <path d="M262 196 L250 206 L262 210 L252 222 L266 222 M370 196 L382 206 L370 210 L380 222 L366 222" fill="#23262b" stroke="#23262b" stroke-width="6" stroke-linejoin="round"/>
+      <circle cx="316" cy="190" r="60" fill="url(#stBlack)"/>
+      <circle cx="316" cy="190" r="60" fill="url(#stFur)"/>
+      <!-- folded ears: short upright base, then the flap tips over and hangs beside the face -->
+      <g class="ear-l">
+        <path d="M264 162 L300 140 L286 110 L254 120Z" fill="#23262b"/>
+        <path d="M268 152 L292 140 L282 120 L262 128Z" fill="url(#stTan)"/>
+        <path d="M254 120 Q270 104 286 110 Q284 148 252 188 Q236 180 236 154 Q238 132 254 120Z" fill="url(#stFlap)"/>
+        <path d="M256 121 Q270 108 284 112" fill="none" stroke="#5b616b" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <g class="ear-r">
+        <path d="M368 162 L332 140 L346 110 L378 120Z" fill="#23262b"/>
+        <path d="M364 152 L340 140 L350 120 L370 128Z" fill="url(#stTan)"/>
+        <path d="M378 120 Q362 104 346 110 Q348 148 380 188 Q396 180 396 154 Q394 132 378 120Z" fill="url(#stFlap)"/>
+        <path d="M376 121 Q362 108 348 112" fill="none" stroke="#5b616b" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <ellipse cx="292" cy="166" rx="8" ry="5" fill="url(#stTan)"/><ellipse cx="340" cy="166" rx="8" ry="5" fill="url(#stTan)"/>
+      <path d="M262 198 Q270 236 302 240 L304 214 Q284 214 270 196Z" fill="url(#stTan)"/>
+      <path d="M370 198 Q362 236 330 240 L328 214 Q348 214 362 196Z" fill="url(#stTan)"/>
+      <ellipse cx="316" cy="219" rx="25" ry="19" fill="url(#stTan)"/>
       <ellipse cx="316" cy="211" rx="15" ry="11" fill="#33373d"/>
       <ellipse cx="316" cy="232" rx="13" ry="7" fill="#d9d2c6"/>
       <ellipse cx="316" cy="205" rx="10" ry="7" fill="#0f1012"/>
+      <ellipse cx="312" cy="202" rx="3.5" ry="2" fill="#fff" opacity=".45"/>
       <!-- blue collar -->
       <path d="M262 236 Q316 268 370 236" fill="none" stroke="#5aa0e6" stroke-width="13" stroke-linecap="round"/>
+      <path d="M266 233 Q316 262 366 233" fill="none" stroke="#8cc2f2" stroke-width="3" stroke-linecap="round"/>
       <rect x="336" y="244" width="18" height="12" rx="3" fill="#3f86d1"/>
       <!-- brown eyes -->
       <g class="eyes-open"><circle cx="294" cy="183" r="8" fill="#7a4520"/><circle cx="338" cy="183" r="8" fill="#7a4520"/>
