@@ -224,12 +224,12 @@
       <!-- other arm: hangs from the shoulder, elbow bent, hand resting on the lap -->
       <path d="M250 258 L228 318 L262 350" fill="none" stroke="#e8b98e" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M248 262 L231 316 L258 342" fill="none" stroke="#fbdcbc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
-      <circle cx="264" cy="351" r="12" fill="url(#skinChild)"/><path d="M258 356 Q264 360 270 356 M259 352 Q264 355 269 352" fill="none" stroke="#cf9468" stroke-width="1.2"/>
+      <g class="hand-slot" data-x="264" data-y="352" data-a="43" data-m="0"></g>
       <path d="M257 250 L249 264" stroke="#f590b3" stroke-width="32" stroke-linecap="round"/>
       <!-- vaccinated arm: same pose, sleeve rolled up to show the upper arm -->
       <path d="M350 258 L372 318 L338 350" fill="none" stroke="#e8b98e" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M347 262 L366 316 L340 342" fill="none" stroke="#fbdcbc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
-      <circle cx="336" cy="351" r="12" fill="url(#skinChild)"/><path d="M330 356 Q336 360 342 356 M331 352 Q336 355 341 352" fill="none" stroke="#cf9468" stroke-width="1.2"/>
+      <g class="hand-slot" data-x="336" data-y="352" data-a="137" data-m="1"></g>
       <path d="M343 250 L351 262" stroke="#f590b3" stroke-width="32" stroke-linecap="round"/>
       <path d="M337.9 270.2 L366.1 259.8" stroke="#d9608a" stroke-width="7" stroke-linecap="round"/>
       <!-- head -->
@@ -455,24 +455,49 @@
 
 <script>
 (function () {
-  // Shared syringe drawing. Local origin = needle tip; +x points back to the hand (thumb on plunger).
-  var syringe =
-    '<g class="plunger"><rect x="104" y="-3" width="46" height="6" fill="#9aa8b5"/>' +
+  // A relaxed hand drawn pointing along +x: palm, four fingers and a thumb on the -y side
+  // (mirror puts the thumb on the other side).
+  function handSVG(x, y, angle, scale, mirror, skin, line) {
+    var t = 'translate(' + x + ' ' + y + ') rotate(' + angle + ') scale(' + scale + ' ' + (mirror ? -scale : scale) + ')';
+    var digit = function (d, w) {
+      return '<path d="' + d + '" fill="none" stroke="' + line + '" stroke-width="' + (w + 1.2) + '" stroke-linecap="round"/>' +
+             '<path d="' + d + '" fill="none" stroke="' + skin + '" stroke-width="' + w + '" stroke-linecap="round"/>';
+    };
+    var fingers = [[-4.8, 11], [-1.6, 12.5], [1.6, 11.5], [4.8, 9]].map(function (f) {
+      return digit('M5 ' + f[0] + ' Q' + (5 + f[1] * .6) + ' ' + f[0] + ' ' + (5 + f[1]) + ' ' + (f[0] + 1.4), 3.4);
+    }).join('');
+    return '<g transform="' + t + '">' + fingers +
+      '<ellipse cx="1" cy="0" rx="8" ry="7.5" fill="' + skin + '" stroke="' + line + '" stroke-width=".8"/>' +
+      digit('M-2 -6 Q4 -11 10 -10', 4.2) + '</g>';
+  }
+
+  // Syringe held in a fist: fingers curl round the plunger, thumb presses the end.
+  // Local origin = needle tip; +x points back to the hand. `.hand` marks the wrist for the arm.
+  function syringeSVG(skin, line) {
+    var digit = function (d, w) {
+      return '<path d="' + d + '" fill="none" stroke="' + line + '" stroke-width="' + (w + 2) + '" stroke-linecap="round"/>' +
+             '<path d="' + d + '" fill="none" stroke="' + skin + '" stroke-width="' + w + '" stroke-linecap="round"/>';
+    };
+    return '<g class="plunger"><rect x="104" y="-3" width="46" height="6" fill="#9aa8b5"/>' +
     '<rect x="98" y="-9" width="6" height="18" fill="#6f7f8f"/><rect x="148" y="-13" width="6" height="26" rx="2" fill="#6f7f8f"/>' +
-    '<circle class="hand" cx="158" cy="0" r="19"/></g>' +
+    digit('M124 -18 Q117 -6 121 9', 7.5) + digit('M134 -19 Q127 -6 131 9', 7.5) + digit('M144 -19 Q137 -6 141 8', 7.5) +
+    '<ellipse cx="146" cy="-17" rx="20" ry="12" fill="' + skin + '" stroke="' + line + '" stroke-width="1.4"/>' +
+    digit('M160 -22 Q166 -8 157 -1', 8) +
+    '<circle class="hand" cx="158" cy="0" r=".1" fill="none"/></g>' +
     '<rect x="34" y="-11" width="68" height="22" rx="4" fill="#eaf6ff" stroke="#5b7388" stroke-width="2.5"/>' +
     '<rect class="liquid" x="38" y="-7" width="60" height="14" fill="#ff6fa5"/>' +
     '<rect x="38" y="-9" width="56" height="3" rx="1.5" fill="#fff" opacity=".7"/>' +
     '<rect x="94" y="-14" width="5" height="28" rx="2" fill="#5b7388"/>' +
     '<rect x="26" y="-5" width="9" height="10" fill="#8aa0b4"/>' +
     '<line x1="0" y1="0" x2="27" y2="0" stroke="#8d99a6" stroke-width="3" stroke-linecap="round"/>';
+  }
 
   // Adult helper figure, built around x = 0 and placed at HELPER_X.
   var HELPER_X = 470;
   var LOOKS = {
-    nurse: { coat: '#ffffff', line: '#b9d3e3', shirt: '#7fd1c7', pants: '#5bbfb3', skin: '#d9a77f', hair: '#2f2a2a',
+    nurse: { coat: '#ffffff', line: '#b9d3e3', shirt: '#7fd1c7', pants: '#5bbfb3', skin: '#d9a77f', hair: '#2f2a2a', skinLine: '#a87652',
              coatFill: 'url(#coatNurse)', pantsFill: 'url(#pantsNurse)', skinFill: 'url(#skinNurse)', hairFill: 'url(#hairNurse)', sheen: '#ffffff', fold: '#c7d8e4' },
-    vet:   { coat: '#7fd1c7', line: '#4fa89d', shirt: '#ffffff', pants: '#3b4a66', skin: '#f2c9a0', hair: '#8a5a2b',
+    vet:   { coat: '#7fd1c7', line: '#4fa89d', shirt: '#ffffff', pants: '#3b4a66', skin: '#f2c9a0', hair: '#8a5a2b', skinLine: '#c99a70',
              coatFill: 'url(#coatVet)', pantsFill: 'url(#pantsVet)', skinFill: 'url(#skinVet)', hairFill: 'url(#hairVet)', sheen: '#c4f0ea', fold: '#5fb4a9' }
   };
   function helperSVG(kind) {
@@ -513,11 +538,11 @@
       '<path d="M-24 129 L-12 164 L2 129Z" fill="' + c.shirt + '"/>' +
       '<path d="M-24 129 L-16 188 M2 129 L-8 188 M-12 164 L-12 332" fill="none" stroke="' + c.line + '" stroke-width="3"/>' +
       '<rect x="8" y="245" width="22" height="18" rx="3" fill="none" stroke="' + c.line + '" stroke-width="3"/>' + steth +
-      '<g class="idle-arm">' + limb(nearArm, 18) + '<circle cx="31" cy="275" r="11.4" fill="' + c.skinFill + '"/></g>' +
+      '<g class="idle-arm">' + limb(nearArm, 18) + handSVG(31, 272, 95, 1.25, true, c.skin, c.skinLine) + '</g>' +
       // head turned toward the patient, scaled to adult proportions (about 6.5 heads tall)
       '<g transform="translate(-5 116) scale(.8) translate(5 -116)">' +
       // skull, forehead, brow, cheekbone, then the jaw tapering to the chin
-      '<path d="M0 42 Q34 42 36 72 Q37 92 22 104 Q8 114 -14 117 Q-26 117 -30 110 Q-35 101 -36 92 Q-38 84 -36 77 Q-38 70 -35 62 Q-28 42 0 42Z" fill="' + c.skinFill + '"/>' +
+      '<path d="M0 42 Q34 42 36 72 Q37 92 22 104 Q8 114 -14 117 Q-26 117 -30 110 Q-35 101 -35 92 Q-34 84 -34 78 Q-36 70 -35 62 Q-28 42 0 42Z" fill="' + c.skinFill + '"/>' +
       // nose bridge and tip break the profile line
       '<path d="M-35 78 Q-40 90 -39.5 94.5 Q-37 98.5 -31 97 L-30 86Z" fill="' + c.skinFill + '"/>' +
       // shading: far side of the face, under the cheekbone, under the jaw
@@ -541,22 +566,26 @@
       '<circle cx="-7" cy="79.4" r=".9" fill="#fff"/>' +
       '<path d="M-32 80.5 Q-26 76 -20 80 M-14 80 Q-6 74 2 80" fill="none" stroke="#2b1d14" stroke-width="1.8" stroke-linecap="round"/>' +
       // nose, cheek, lips
-      '<path d="M-31 97 Q-27 99 -22 96" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="1.8" stroke-linecap="round"/>' +
-      '<path d="M-22 80 Q-24 88 -26 92" fill="none" stroke="#000" stroke-opacity=".1" stroke-width="2" stroke-linecap="round"/>' +
+      '<path d="M-33 96 Q-30 98.5 -27 96.5" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<ellipse cx="-31" cy="100" rx="4.5" ry="1.4" fill="#000" opacity=".1"/>' +
       '<ellipse cx="0" cy="96" rx="7" ry="4.5" fill="#ff9aa8" opacity=".35"/>' +
       '<path d="M-27 105 Q-18 110 -9 105" fill="none" stroke="#a9525e" stroke-width="2.6" stroke-linecap="round"/>' +
       '<path d="M-24 108 Q-18 110 -12 108" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="1.6" stroke-linecap="round"/>' +
       '</g>' +
       '</g>' +
-      '<g class="syrpose"><g style="transform: scale(.6)">' + syringe + '</g></g>');
+      '<g class="syrpose"><g style="transform: scale(.6)">' + syringeSVG(c.skin, c.skinLine) + '</g></g>');
   }
+
+  document.querySelectorAll('.hand-slot').forEach(function (g) {
+    var d = g.dataset;
+    g.innerHTML = handSVG(+d.x, +d.y, +d.a, 1.05, d.m === '1', '#f0c59b', '#cf9468');
+  });
 
   var scenes = [document.getElementById('s1'), document.getElementById('s2')];
   var svgEl = document.getElementById('svg');
   var rigs = [0, 1].map(function (i) {
     var host = scenes[i].querySelector('.helper');
     host.innerHTML = helperSVG(host.dataset.kind);
-    host.querySelector('.hand').setAttribute('fill', LOOKS[host.dataset.kind].skinFill);
     return { host: host, pose: null, from: null, to: null, t0: 0, dur: 1 };
   });
 
