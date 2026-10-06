@@ -329,38 +329,45 @@
       return '<path d="' + d + '" fill="none" stroke="' + c.line + '" stroke-width="' + (w + 6) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
              '<path d="' + d + '" fill="none" stroke="' + c.coat + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>';
     };
-    var extra = kind === 'nurse'
-      ? '<rect x="-26" y="33" width="52" height="15" rx="5" fill="#fff" stroke="' + c.line + '" stroke-width="2"/>' +
-        '<rect x="-4" y="35" width="8" height="11" fill="#ff6f91"/><rect x="-8" y="38" width="16" height="5" fill="#ff6f91"/>'
+    // 3/4 view facing left (toward the patient). Face, collar and coat opening sit toward the left;
+    // only the far-side ear shows. The leading (far) arm does the work; the near arm hangs relaxed.
+    var cap = kind === 'nurse'
+      ? '<path d="M-36 50 Q-34 34 -6 33 Q20 34 24 50Z" fill="#fff" stroke="' + c.line + '" stroke-width="2"/>' +
+        '<rect x="-17" y="36" width="7" height="11" fill="#ff6f91"/><rect x="-21" y="39" width="15" height="5" fill="#ff6f91"/>'
       : '';
     var steth = kind === 'vet'
-      ? '<path d="M-13 131 Q-22 196 0 202 Q22 196 13 131" fill="none" stroke="#3b4a66" stroke-width="4"/>' +
-        '<circle cx="0" cy="205" r="7" fill="#cfd8e3" stroke="#3b4a66" stroke-width="3"/>'
+      ? '<path d="M-24 131 Q-30 194 -12 200 Q6 194 2 131" fill="none" stroke="#3b4a66" stroke-width="4"/>' +
+        '<circle cx="-12" cy="203" r="7" fill="#cfd8e3" stroke="#3b4a66" stroke-width="3"/>'
       : '';
-    return '<g transform="translate(' + HELPER_X + ' 0)">' +
-      // legs + shoes
-      '<rect x="-27" y="300" width="21" height="116" rx="9" fill="' + c.pants + '"/>' +
-      '<rect x="6" y="300" width="21" height="116" rx="9" fill="' + c.pants + '"/>' +
-      '<ellipse cx="-19" cy="419" rx="17" ry="8" fill="#3a3a3a"/><ellipse cx="19" cy="419" rx="17" ry="8" fill="#3a3a3a"/>' +
-      // neck, torso (coat to the knees)
-      '<rect x="-9" y="106" width="18" height="28" fill="' + c.skin + '"/>' +
-      '<path d="M-42 144 Q-40 130 -24 129 L24 129 Q40 130 42 144 L50 332 L-50 332Z" fill="' + c.coat + '" stroke="' + c.line + '" stroke-width="3"/>' +
-      '<path d="M-15 129 L0 168 L15 129Z" fill="' + c.shirt + '"/>' +
-      '<path d="M-15 129 L-3 190 M15 129 L3 190 M0 168 L0 332" fill="none" stroke="' + c.line + '" stroke-width="3"/>' +
-      '<rect x="14" y="245" width="22" height="18" rx="3" fill="none" stroke="' + c.line + '" stroke-width="3"/>' + steth +
-      // relaxed far arm: shoulder, slight bend at the elbow, hand at mid-thigh
-      '<g class="idle-arm">' + limb('M38 148 L45 208 L41 262', 18) + '<circle cx="41" cy="268" r="11" fill="' + c.skin + '"/></g>' +
-      // head
-      '<circle cx="-35" cy="84" r="7" fill="' + c.skin + '"/><circle cx="35" cy="84" r="7" fill="' + c.skin + '"/>' +
-      '<circle cx="0" cy="80" r="36" fill="' + c.skin + '"/>' +
-      '<path d="M-37 80 Q-37 40 0 41 Q37 40 37 80 Q28 58 0 60 Q-28 58 -37 80Z" fill="' + c.hair + '"/>' + extra +
-      '<circle cx="-12" cy="82" r="4.5" fill="#2b2b2b"/><circle cx="12" cy="82" r="4.5" fill="#2b2b2b"/>' +
-      '<circle cx="-20" cy="94" r="5" fill="#ff9aa8" opacity=".5"/><circle cx="20" cy="94" r="5" fill="#ff9aa8" opacity=".5"/>' +
-      '<path d="M-9 96 Q0 104 9 96" fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"/>' +
-      '</g>' +
-      // working arm (bent by script) and the syringe in that hand
+    // near arm: same bone lengths as the working arm (upper 62, forearm 58), elbow slightly back
+    var nearArm = 'M30 150 L36 211.7 L31 269.5';
+    return (
+      // working arm (bent by script) sits behind the torso, like a far arm should
       '<g class="arm">' + limb('', 18) + '</g>' +
-      '<g class="syrpose"><g style="transform: scale(.6)">' + syringe + '</g></g>';
+      '<g transform="translate(' + HELPER_X + ' 0)">' +
+      // legs: far leg a touch darker and set back; shoes point toward the patient
+      '<rect x="-24" y="300" width="20" height="116" rx="9" fill="' + c.pants + '" style="filter: brightness(.85)"/>' +
+      '<ellipse cx="-24" cy="419" rx="18" ry="8" fill="#2c2c2c"/>' +
+      '<rect x="-2" y="300" width="21" height="118" rx="9" fill="' + c.pants + '"/>' +
+      '<ellipse cx="0" cy="421" rx="19" ry="8" fill="#3a3a3a"/>' +
+      // neck and coat
+      '<rect x="-14" y="106" width="18" height="28" fill="' + c.skin + '"/>' +
+      '<path d="M-34 146 Q-32 131 -18 129 L22 129 Q40 131 42 146 L48 332 L-44 332Z" fill="' + c.coat + '" stroke="' + c.line + '" stroke-width="3"/>' +
+      '<path d="M-24 129 L-12 164 L2 129Z" fill="' + c.shirt + '"/>' +
+      '<path d="M-24 129 L-16 188 M2 129 L-8 188 M-12 164 L-12 332" fill="none" stroke="' + c.line + '" stroke-width="3"/>' +
+      '<rect x="8" y="245" width="22" height="18" rx="3" fill="none" stroke="' + c.line + '" stroke-width="3"/>' + steth +
+      '<g class="idle-arm">' + limb(nearArm, 18) + '<circle cx="31" cy="275" r="11.4" fill="' + c.skin + '"/></g>' +
+      // head turned toward the patient
+      '<circle cx="24" cy="86" r="7" fill="' + c.skin + '"/>' +
+      '<circle cx="-4" cy="80" r="36" fill="' + c.skin + '"/>' +
+      '<circle cx="-39" cy="88" r="5" fill="' + c.skin + '"/>' +
+      '<path d="M-38 70 Q-36 40 -4 41 Q34 40 34 80 Q34 96 26 104 Q28 80 18 66 Q-8 58 -38 70Z" fill="' + c.hair + '"/>' + cap +
+      '<circle cx="24" cy="86" r="7" fill="' + c.skin + '"/>' +
+      '<ellipse cx="-26" cy="82" rx="3.5" ry="4.5" fill="#2b2b2b"/><circle cx="-6" cy="82" r="4.5" fill="#2b2b2b"/>' +
+      '<circle cx="2" cy="95" r="5.5" fill="#ff9aa8" opacity=".5"/>' +
+      '<path d="M-26 97 Q-18 104 -10 97" fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"/>' +
+      '</g>' +
+      '<g class="syrpose"><g style="transform: scale(.6)">' + syringe + '</g></g>');
   }
 
   var scenes = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
@@ -372,16 +379,19 @@
     return { host: host, pose: null, from: null, to: null, t0: 0, dur: 1 };
   });
 
-  // Poses place the needle tip (x, y) and the syringe angle a (degrees).
+  // Poses place the hand (x, y) and the syringe angle a (degrees). Blending hand positions keeps
+  // every in-between frame inside the arm's reach, so the arm never has to stretch.
   var GRIP = 158 * 0.6;              // tip -> hand distance at this scale
   var SHOT = [{ x: 369, y: 292 }, { x: 361, y: 289 }];   // child's arm, puppy's shoulder
-  function restPose() {              // arm hanging relaxed, syringe held low by the hip
-    var a = -95, r = a * Math.PI / 180, hx = HELPER_X - 52, hy = 266;
-    return { x: hx - GRIP * Math.cos(r), y: hy - GRIP * Math.sin(r), a: a };
+  var PUSH = 48 * 0.6;               // how far the thumb travels when the plunger is pressed
+  function restPose(i) {             // arm hanging relaxed, syringe held low by the hip
+    // after the shot the plunger stays pressed, so offset the grip to keep the thumb at the same spot
+    var a = -95, r = a * Math.PI / 180, push = i != null && scenes[i].classList.contains('poke') ? PUSH : 0;
+    return { x: HELPER_X - 46 + push * Math.cos(r), y: 266 + push * Math.sin(r), a: a };
   }
-  function shotPose(i, back) {
-    var a = -40, r = a * Math.PI / 180;
-    return { x: SHOT[i].x + back * Math.cos(r), y: SHOT[i].y + back * Math.sin(r), a: a };
+  function shotPose(i, back) {       // hand on the line of the needle, `back` px from the skin
+    var a = -55, r = a * Math.PI / 180;
+    return { x: SHOT[i].x + (GRIP + back) * Math.cos(r), y: SHOT[i].y + (GRIP + back) * Math.sin(r), a: a };
   }
   function moveTo(i, pose, dur) {
     var rig = rigs[i];
@@ -389,8 +399,8 @@
   }
   function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
-  // Two-bone IK: upper arm and forearm keep their lengths; the elbow points out, away from the torso.
-  var SHOULDER = { x: HELPER_X - 38, y: 148 }, UPPER = 62, FORE = 58;
+  // Two-bone IK: upper arm and forearm keep their lengths; in this 3/4 view the elbow points back and down.
+  var SHOULDER = { x: HELPER_X - 30, y: 150 }, UPPER = 62, FORE = 58;
   function frame(now) {
     rigs.forEach(function (rig) {
       if (rig.to) {
@@ -402,8 +412,9 @@
         };
         if (t === 1) rig.to = null;
       }
-      var p = rig.pose;
-      rig.host.querySelector('.syrpose').setAttribute('transform', 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') rotate(' + p.a.toFixed(2) + ')');
+      var p = rig.pose, pr = p.a * Math.PI / 180;
+      var tx = p.x - GRIP * Math.cos(pr), ty = p.y - GRIP * Math.sin(pr);
+      rig.host.querySelector('.syrpose').setAttribute('transform', 'translate(' + tx.toFixed(1) + ' ' + ty.toFixed(1) + ') rotate(' + p.a.toFixed(2) + ')');
 
       var hand = rig.host.querySelector('.hand');
       var h = new DOMPoint(158, 0).matrixTransform(svgEl.getScreenCTM().inverse().multiply(hand.getScreenCTM()));
@@ -411,7 +422,7 @@
       var d = Math.max(UPPER - FORE + 1, Math.min(Math.hypot(dx, dy), UPPER + FORE - 0.5));
       var a = Math.atan2(dy, dx);
       var b = Math.acos((UPPER * UPPER + d * d - FORE * FORE) / (2 * UPPER * d));
-      var ex = SHOULDER.x + UPPER * Math.cos(a + b), ey = SHOULDER.y + UPPER * Math.sin(a + b);
+      var ex = SHOULDER.x + UPPER * Math.cos(a - b), ey = SHOULDER.y + UPPER * Math.sin(a - b);
       var path = 'M' + SHOULDER.x + ' ' + SHOULDER.y + ' L' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ' L' + h.x.toFixed(1) + ' ' + h.y.toFixed(1);
       rig.host.querySelectorAll('.arm path').forEach(function (el) { el.setAttribute('d', path); });
     });
@@ -433,7 +444,7 @@
     scenes[i].classList.add(cls);
     if (cls === 'approach') moveTo(i, shotPose(i, 35), 1400);
     if (cls === 'poke') moveTo(i, shotPose(i, 0), 500);
-    if (cls === 'done') moveTo(i, restPose(), 1300);
+    if (cls === 'done') moveTo(i, restPose(i), 1300);
   }
 
   function play() {
