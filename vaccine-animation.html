@@ -85,9 +85,9 @@
   button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-dark); }
   .snap * { transition: none !important; }
   .plunger { transition: transform 1s ease-in; }
-  .poke .plunger { transform: translateX(-48px); }
+  .poke .plunger { transform: translateX(-24px); }
   .liquid { transform-box: fill-box; transform-origin: left center; transition: transform 1s ease-in; }
-  .poke .liquid { transform: scaleX(.12); }
+  .poke .liquid { transform: scaleX(.6); }
   .bandage { opacity: 0; transform: scale(.3); transform-box: fill-box; transform-origin: center; transition: opacity .4s, transform .4s cubic-bezier(.3, 1.6, .5, 1); }
   .done .bandage { opacity: 1; transform: scale(1); }
 
@@ -455,41 +455,57 @@
 
 <script>
 (function () {
-  // A relaxed hand drawn pointing along +x: palm, four fingers and a thumb on the -y side
-  // (mirror puts the thumb on the other side).
-  function handSVG(x, y, angle, scale, mirror, skin, line) {
-    var t = 'translate(' + x + ' ' + y + ') rotate(' + angle + ') scale(' + scale + ' ' + (mirror ? -scale : scale) + ')';
-    var digit = function (d, w) {
-      return '<path d="' + d + '" fill="none" stroke="' + line + '" stroke-width="' + (w + 1.2) + '" stroke-linecap="round"/>' +
-             '<path d="' + d + '" fill="none" stroke="' + skin + '" stroke-width="' + w + '" stroke-linecap="round"/>';
-    };
-    var fingers = [[-4.8, 11], [-1.6, 12.5], [1.6, 11.5], [4.8, 9]].map(function (f) {
-      return digit('M5 ' + f[0] + ' Q' + (5 + f[1] * .6) + ' ' + f[0] + ' ' + (5 + f[1]) + ' ' + (f[0] + 1.4), 3.4);
-    }).join('');
-    return '<g transform="' + t + '">' + fingers +
-      '<ellipse cx="1" cy="0" rx="8" ry="7.5" fill="' + skin + '" stroke="' + line + '" stroke-width=".8"/>' +
-      digit('M-2 -6 Q4 -11 10 -10', 4.2) + '</g>';
+  // A relaxed hanging hand seen from the side: palm toward the thigh, fingers together and
+  // gently curled forward, thumb lying along the index finger. Drawn pointing down (+y) with
+  // the front of the hand toward -x.
+  function handRestSVG(x, y, angle, scale, skin, line) {
+    return '<g transform="translate(' + x + ' ' + y + ') rotate(' + angle + ') scale(' + scale + ')">' +
+      '<path d="M-4.5 -2 L-4.5 0 C-6 8 -7 14 -6 19 C-5.5 24 -4 28 -1 30 C2 31 4 29 4.5 26 C6 20 6.5 12 5.5 6 C5 3 4.8 1 4.5 0 L4.5 -2Z" fill="' + skin + '"/>' +
+      '<path d="M-4.5 0 C-6 8 -7 14 -6 19 C-5.5 24 -4 28 -1 30 C2 31 4 29 4.5 26 C6 20 6.5 12 5.5 6 C5 3 4.8 1 4.5 0" fill="none" stroke="' + line + '" stroke-width=".8"/>' +
+      '<path d="M-1.6 19 Q-.6 24 .4 28.6 M1.4 18 Q2.4 23 3.1 27" fill="none" stroke="' + line + '" stroke-width=".7" opacity=".6"/>' +
+      '<path d="M-5 5 C-9 9 -9.5 14.5 -7.6 18.5 C-6.6 20 -5 19 -5.2 17Z" fill="' + skin + '" stroke="' + line + '" stroke-width=".8"/>' +
+      '<path d="M3.5 4 Q5 12 4.6 20" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.4" stroke-linecap="round"/>' +
+      '</g>';
   }
 
-  // Syringe held in a fist: fingers curl round the plunger, thumb presses the end.
-  // Local origin = needle tip; +x points back to the hand. `.hand` marks the wrist for the arm.
+  // The back of a hand resting palm-down, pointing along +x with the thumb on the -y side
+  // (mirror puts the thumb on the other side): fingers together with soft separations and nails.
+  function handBackSVG(x, y, angle, scale, mirror, skin, line) {
+    var t = 'translate(' + x + ' ' + y + ') rotate(' + angle + ') scale(' + scale + ' ' + (mirror ? -scale : scale) + ')';
+    return '<g transform="' + t + '">' +
+      '<path d="M-2 -5.5 Q5 -9.5 10 -8.2 Q11 -7 9 -6.4 Q4 -6.6 -1 -4Z" fill="' + skin + '" stroke="' + line + '" stroke-width=".7"/>' +
+      '<path d="M-5 -5.6 L7 -6 L18 -5.8 Q20.6 -4.2 18 -2.8 Q21.6 -1.4 19 0 Q20.6 1.5 18 2.8 Q17.6 4.4 15.5 5.6 L7 6 L-5 5.4Z" fill="' + skin + '" stroke="' + line + '" stroke-width=".7"/>' +
+      '<path d="M9 -2.8 L18 -2.8 M9 0 L19 0 M9 2.8 L18 2.8" stroke="' + line + '" stroke-width=".6" opacity=".6"/>' +
+      '<path d="M5 -4 Q6 0 5 4" fill="none" stroke="' + line + '" stroke-width=".5" opacity=".45"/>' +
+      '<ellipse cx="17.4" cy="-4.2" rx="1.3" ry=".9" fill="#fff" opacity=".5"/><ellipse cx="18.6" cy="-1.4" rx="1.3" ry=".9" fill="#fff" opacity=".5"/>' +
+      '<ellipse cx="18" cy="1.4" rx="1.3" ry=".9" fill="#fff" opacity=".5"/><ellipse cx="15.6" cy="4.2" rx="1.2" ry=".8" fill="#fff" opacity=".5"/>' +
+      '</g>';
+  }
+
+  // Syringe held the way clinicians do: index and middle fingers wrapped behind the finger
+  // flange, ring and little fingers curled, thumb on the plunger (the script bends the thumb as
+  // the plunger goes in). Local origin = needle tip; +x points back to the hand.
+  // `.hand` marks the wrist for the arm.
   function syringeSVG(skin, line) {
-    var digit = function (d, w) {
-      return '<path d="' + d + '" fill="none" stroke="' + line + '" stroke-width="' + (w + 2) + '" stroke-linecap="round"/>' +
-             '<path d="' + d + '" fill="none" stroke="' + skin + '" stroke-width="' + w + '" stroke-linecap="round"/>';
+    var digit = function (d, w, cls) {
+      return '<path' + (cls ? ' class="' + cls + '-o"' : '') + ' d="' + d + '" fill="none" stroke="' + line + '" stroke-width="' + (w + 2) + '" stroke-linecap="round"/>' +
+             '<path' + (cls ? ' class="' + cls + '"' : '') + ' d="' + d + '" fill="none" stroke="' + skin + '" stroke-width="' + w + '" stroke-linecap="round"/>';
     };
     return '<g class="plunger"><rect x="104" y="-3" width="46" height="6" fill="#9aa8b5"/>' +
-    '<rect x="98" y="-9" width="6" height="18" fill="#6f7f8f"/><rect x="148" y="-13" width="6" height="26" rx="2" fill="#6f7f8f"/>' +
-    digit('M124 -18 Q117 -6 121 9', 7.5) + digit('M134 -19 Q127 -6 131 9', 7.5) + digit('M144 -19 Q137 -6 141 8', 7.5) +
-    '<ellipse cx="146" cy="-17" rx="20" ry="12" fill="' + skin + '" stroke="' + line + '" stroke-width="1.4"/>' +
-    digit('M160 -22 Q166 -8 157 -1', 8) +
-    '<circle class="hand" cx="158" cy="0" r=".1" fill="none"/></g>' +
+    '<rect x="98" y="-9" width="6" height="18" fill="#6f7f8f"/><rect x="148" y="-13" width="6" height="26" rx="2" fill="#6f7f8f"/></g>' +
     '<rect x="34" y="-11" width="68" height="22" rx="4" fill="#eaf6ff" stroke="#5b7388" stroke-width="2.5"/>' +
     '<rect class="liquid" x="38" y="-7" width="60" height="14" fill="#ff6fa5"/>' +
     '<rect x="38" y="-9" width="56" height="3" rx="1.5" fill="#fff" opacity=".7"/>' +
     '<rect x="94" y="-14" width="5" height="28" rx="2" fill="#5b7388"/>' +
     '<rect x="26" y="-5" width="9" height="10" fill="#8aa0b4"/>' +
-    '<line x1="0" y1="0" x2="27" y2="0" stroke="#8d99a6" stroke-width="3" stroke-linecap="round"/>';
+    '<line x1="0" y1="0" x2="27" y2="0" stroke="#8d99a6" stroke-width="3" stroke-linecap="round"/>' +
+    // back of the hand above the syringe, then the fingers wrapping round it
+    '<path d="M100 -15 Q104 -29 124 -29 L142 -27 Q154 -24 153 -15 Q150 -9 138 -9 L106 -11Z" fill="' + skin + '"/>' +
+    '<path d="M142 -27 L124 -29 Q104 -29 100 -15 L106 -11 L138 -9" fill="none" stroke="' + line + '" stroke-width="1.4" stroke-linejoin="round"/>' +
+    digit('M103 -16 Q98 -2 103 13', 8.5) + digit('M113 -17 Q108 -2 113 12', 8.5) +
+    digit('M123 -17 Q121 -8 125 -3', 7.5) + digit('M132 -16 Q131 -9 134 -5', 6.5) +
+    digit('M138 -22 Q162 -18 156 -1', 9, 'thumb') +
+    '<circle class="hand" cx="150" cy="-20" r=".1" fill="none"/>';
   }
 
   // Adult helper figure, built around x = 0 and placed at HELPER_X.
@@ -503,9 +519,14 @@
   function helperSVG(kind) {
     var c = LOOKS[kind];
     var limb = function (d, w) {
-      return '<path d="' + d + '" fill="none" stroke="' + c.line + '" stroke-width="' + (w + 6) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
-             '<path d="' + d + '" fill="none" stroke="' + c.coat + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>' +
-             '<path d="' + d + '" fill="none" stroke="' + c.sheen + '" stroke-opacity=".6" stroke-width="' + (w / 3) + '" stroke-linecap="round" stroke-linejoin="round" transform="translate(-3 -1)"/>';
+      return '<path class="sleeve" d="' + d + '" fill="none" stroke="' + c.line + '" stroke-width="' + (w + 6) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+             '<path class="sleeve" d="' + d + '" fill="none" stroke="' + c.coat + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+             '<path class="sleeve" d="' + d + '" fill="none" stroke="' + c.sheen + '" stroke-opacity=".6" stroke-width="' + (w / 3) + '" stroke-linecap="round" stroke-linejoin="round" transform="translate(-3 -1)"/>';
+    };
+    // skin-coloured wrist running from inside the cuff into the back of the hand
+    var wrist = function (d) {
+      return '<path class="wrist" d="' + d + '" fill="none" stroke="' + c.skinLine + '" stroke-width="12.5" stroke-linecap="round"/>' +
+             '<path class="wrist" d="' + d + '" fill="none" stroke="' + c.skin + '" stroke-width="11" stroke-linecap="round"/>';
     };
     // 3/4 view facing left (toward the patient). Face, collar and coat opening sit toward the left;
     // only the far-side ear shows. The leading (far) arm does the work; the near arm hangs relaxed.
@@ -518,10 +539,10 @@
         '<circle cx="-12" cy="203" r="7" fill="#cfd8e3" stroke="#3b4a66" stroke-width="3"/>'
       : '';
     // near arm: same bone lengths as the working arm (upper 62, forearm 58), elbow slightly back
-    var nearArm = 'M30 150 L36 211.7 L31 269.5';
+    var nearArm = 'M30 150 L36 211.7 L32.6 252';   // forearm stops at the cuff, 0.7 of the way to the wrist
     return (
       // working arm (bent by script) sits behind the torso, like a far arm should
-      '<g class="arm">' + limb('', 18) + '</g>' +
+      '<g class="arm">' + wrist('') + limb('', 18) + '</g>' +
       '<g transform="translate(' + HELPER_X + ' 0)">' +
       // legs: far leg a touch darker and set back; shoes point toward the patient
       '<ellipse cx="-6" cy="425" rx="48" ry="7" fill="url(#castShadow)"/>' +
@@ -538,16 +559,14 @@
       '<path d="M-24 129 L-12 164 L2 129Z" fill="' + c.shirt + '"/>' +
       '<path d="M-24 129 L-16 188 M2 129 L-8 188 M-12 164 L-12 332" fill="none" stroke="' + c.line + '" stroke-width="3"/>' +
       '<rect x="8" y="245" width="22" height="18" rx="3" fill="none" stroke="' + c.line + '" stroke-width="3"/>' + steth +
-      '<g class="idle-arm">' + limb(nearArm, 18) + handSVG(31, 272, 95, 1.25, true, c.skin, c.skinLine) + '</g>' +
+      '<g class="idle-arm">' + wrist('M32.6 250 L31.2 267') + handRestSVG(31, 266, 5, 1.25, c.skin, c.skinLine) + limb(nearArm, 18) + '</g>' +
       // head turned toward the patient, scaled to adult proportions (about 6.5 heads tall)
       '<g transform="translate(-5 116) scale(.8) translate(5 -116)">' +
       // skull, forehead, brow, cheekbone, then the jaw tapering to the chin
-      '<path d="M0 42 Q34 42 36 72 Q37 92 22 104 Q8 114 -14 117 Q-26 117 -30 110 Q-35 101 -35 92 Q-34 84 -34 78 Q-36 70 -35 62 Q-28 42 0 42Z" fill="' + c.skinFill + '"/>' +
-      // nose bridge and tip break the profile line
-      '<path d="M-35 78 Q-40 90 -39.5 94.5 Q-37 98.5 -31 97 L-30 86Z" fill="' + c.skinFill + '"/>' +
+      // (the nose is part of the outline, so it shares the face's shading)
+      '<path d="M0 42 Q34 42 36 72 Q37 92 22 104 Q8 114 -14 117 Q-26 117 -30 110 Q-34 105 -33 101 Q-32 98.5 -31 98 Q-38 98 -39.5 94.5 Q-39 89 -35 79 Q-34 74 -35 70 Q-36 66 -35 62 Q-28 42 0 42Z" fill="' + c.skinFill + '"/>' +
       // shading: far side of the face, under the cheekbone, under the jaw
       '<path d="M18 58 Q36 70 35 88 Q32 100 22 104 Q8 113 -6 116 Q14 100 18 58Z" fill="#000" opacity=".09"/>' +
-      '<path d="M-30 96 Q-24 106 -12 108" fill="none" stroke="#000" stroke-opacity=".07" stroke-width="4" stroke-linecap="round"/>' +
       '<g filter="url(#fuzzySoft)">' +
       '<path d="M-38 70 Q-36 40 -4 41 Q34 40 34 80 Q34 96 26 104 Q28 80 18 66 Q-8 58 -38 70Z" fill="' + c.hairFill + '"/>' +
       (kind === 'nurse' ? '<circle cx="26" cy="60" r="13" fill="' + c.hairFill + '"/>' : '') +
@@ -566,8 +585,6 @@
       '<circle cx="-7" cy="79.4" r=".9" fill="#fff"/>' +
       '<path d="M-32 80.5 Q-26 76 -20 80 M-14 80 Q-6 74 2 80" fill="none" stroke="#2b1d14" stroke-width="1.8" stroke-linecap="round"/>' +
       // nose, cheek, lips
-      '<path d="M-33 96 Q-30 98.5 -27 96.5" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="1.5" stroke-linecap="round"/>' +
-      '<ellipse cx="-31" cy="100" rx="4.5" ry="1.4" fill="#000" opacity=".1"/>' +
       '<ellipse cx="0" cy="96" rx="7" ry="4.5" fill="#ff9aa8" opacity=".35"/>' +
       '<path d="M-27 105 Q-18 110 -9 105" fill="none" stroke="#a9525e" stroke-width="2.6" stroke-linecap="round"/>' +
       '<path d="M-24 108 Q-18 110 -12 108" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="1.6" stroke-linecap="round"/>' +
@@ -578,7 +595,7 @@
 
   document.querySelectorAll('.hand-slot').forEach(function (g) {
     var d = g.dataset;
-    g.innerHTML = handSVG(+d.x, +d.y, +d.a, 1.05, d.m === '1', '#f0c59b', '#cf9468');
+    g.innerHTML = handBackSVG(+d.x, +d.y, +d.a, 1.05, d.m === '1', '#f0c59b', '#cf9468');
   });
 
   var scenes = [document.getElementById('s1'), document.getElementById('s2')];
@@ -593,11 +610,8 @@
   // every in-between frame inside the arm's reach, so the arm never has to stretch.
   var GRIP = 158 * 0.6;              // tip -> hand distance at this scale
   var SHOT = [{ x: 350, y: 307 }, { x: 361, y: 289 }];   // child's upper arm, puppy's shoulder
-  var PUSH = 48 * 0.6;               // how far the thumb travels when the plunger is pressed
-  function restPose(i) {             // arm hanging relaxed, syringe held low by the hip
-    // after the shot the plunger stays pressed, so offset the grip to keep the thumb at the same spot
-    var a = -110, r = a * Math.PI / 180, push = i != null && scenes[i].classList.contains('poke') ? PUSH : 0;
-    return { x: HELPER_X - 46 + push * Math.cos(r), y: 266 + push * Math.sin(r), a: a };
+  function restPose() {              // arm hanging relaxed, syringe held low by the hip
+    return { x: HELPER_X - 40, y: 256, a: -110 };
   }
   function shotPose(i, back) {       // hand on the line of the needle, `back` px from the skin
     var a = -60, r = a * Math.PI / 180;
@@ -610,7 +624,7 @@
   function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
   // Two-bone IK: upper arm and forearm keep their lengths; in this 3/4 view the elbow points back and down.
-  var SHOULDER = { x: HELPER_X - 30, y: 150 }, UPPER = 62, FORE = 58;
+  var SHOULDER = { x: HELPER_X - 30, y: 150 }, UPPER = 62, FORE = 58, CUFF = .72;
   function frame(now) {
     rigs.forEach(function (rig) {
       if (rig.to) {
@@ -627,14 +641,24 @@
       rig.host.querySelector('.syrpose').setAttribute('transform', 'translate(' + tx.toFixed(1) + ' ' + ty.toFixed(1) + ') rotate(' + p.a.toFixed(2) + ')');
 
       var hand = rig.host.querySelector('.hand');
-      var h = new DOMPoint(158, 0).matrixTransform(svgEl.getScreenCTM().inverse().multiply(hand.getScreenCTM()));
+      var h = new DOMPoint(150, -20).matrixTransform(svgEl.getScreenCTM().inverse().multiply(hand.getScreenCTM()));
+
+      // thumb follows the plunger in
+      var push = new DOMMatrix(getComputedStyle(rig.host.querySelector('.plunger')).transform).m41;
+      var tip = 156 + push;
+      var thumb = 'M138 -22 Q' + (tip + 6) + ' -18 ' + tip + ' -1';
+      rig.host.querySelectorAll('.thumb, .thumb-o').forEach(function (el) { el.setAttribute('d', thumb); });
       var dx = h.x - SHOULDER.x, dy = h.y - SHOULDER.y;
       var d = Math.max(UPPER - FORE + 1, Math.min(Math.hypot(dx, dy), UPPER + FORE - 0.5));
       var a = Math.atan2(dy, dx);
       var b = Math.acos((UPPER * UPPER + d * d - FORE * FORE) / (2 * UPPER * d));
       var ex = SHOULDER.x + UPPER * Math.cos(a - b), ey = SHOULDER.y + UPPER * Math.sin(a - b);
-      var path = 'M' + SHOULDER.x + ' ' + SHOULDER.y + ' L' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ' L' + h.x.toFixed(1) + ' ' + h.y.toFixed(1);
-      rig.host.querySelectorAll('.arm path').forEach(function (el) { el.setAttribute('d', path); });
+      // the sleeve ends at the cuff; the wrist carries on from inside the cuff into the hand
+      var cx = ex + (h.x - ex) * CUFF, cy = ey + (h.y - ey) * CUFF;
+      var sleeve = 'M' + SHOULDER.x + ' ' + SHOULDER.y + ' L' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ' L' + cx.toFixed(1) + ' ' + cy.toFixed(1);
+      var wr = 'M' + (ex + (h.x - ex) * (CUFF - .05)).toFixed(1) + ' ' + (ey + (h.y - ey) * (CUFF - .05)).toFixed(1) + ' L' + h.x.toFixed(1) + ' ' + h.y.toFixed(1);
+      rig.host.querySelectorAll('.arm .sleeve').forEach(function (el) { el.setAttribute('d', sleeve); });
+      rig.host.querySelectorAll('.arm .wrist').forEach(function (el) { el.setAttribute('d', wr); });
     });
     requestAnimationFrame(frame);
   }
@@ -660,7 +684,7 @@
     scenes[i].classList.add(cls);
     if (cls === 'approach') moveTo(i, shotPose(i, 25), 1400);
     if (cls === 'poke') moveTo(i, shotPose(i, 0), 500);
-    if (cls === 'done') moveTo(i, restPose(i), 1300);
+    if (cls === 'done') moveTo(i, restPose(), 1300);
   }
 
   function play() {
