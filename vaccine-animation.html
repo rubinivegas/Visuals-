@@ -389,7 +389,7 @@
   }
   function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
-  // Two-bone IK: upper arm and forearm keep their lengths; the elbow bends downward.
+  // Two-bone IK: upper arm and forearm keep their lengths; the elbow points out, away from the torso.
   var SHOULDER = { x: HELPER_X - 38, y: 148 }, UPPER = 62, FORE = 58;
   function frame(now) {
     rigs.forEach(function (rig) {
@@ -411,7 +411,7 @@
       var d = Math.max(UPPER - FORE + 1, Math.min(Math.hypot(dx, dy), UPPER + FORE - 0.5));
       var a = Math.atan2(dy, dx);
       var b = Math.acos((UPPER * UPPER + d * d - FORE * FORE) / (2 * UPPER * d));
-      var ex = SHOULDER.x + UPPER * Math.cos(a - b), ey = SHOULDER.y + UPPER * Math.sin(a - b);
+      var ex = SHOULDER.x + UPPER * Math.cos(a + b), ey = SHOULDER.y + UPPER * Math.sin(a + b);
       var path = 'M' + SHOULDER.x + ' ' + SHOULDER.y + ' L' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ' L' + h.x.toFixed(1) + ' ' + h.y.toFixed(1);
       rig.host.querySelectorAll('.arm path').forEach(function (el) { el.setAttribute('d', path); });
     });
