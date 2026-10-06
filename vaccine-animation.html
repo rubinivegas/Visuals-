@@ -113,46 +113,120 @@
 </head>
 <body>
 <div class="stage">
-<svg id="svg" viewBox="0 0 800 450" role="img" aria-label="Animation of a child, Maya, and then a puppy, Stella, getting vaccines">
+<svg id="svg" viewBox="0 0 800 450" role="img" aria-label="Animation of a girl, Maya, and then a puppy, Stella, getting vaccines">
+
+  <!-- shared shading and textures -->
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#1d2b3a" flood-opacity=".22"/>
+    </filter>
+    <linearGradient id="wallBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eaf8fe"/><stop offset="1" stop-color="#c9e6f3"/></linearGradient>
+    <linearGradient id="wallGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0fbf2"/><stop offset="1" stop-color="#d2ecd8"/></linearGradient>
+    <pattern id="wallTex" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="6" r="1.6" fill="#ffffff" opacity=".55"/><circle cx="19" cy="19" r="1.6" fill="#ffffff" opacity=".55"/>
+      <path d="M13 0 V26" stroke="#ffffff" stroke-opacity=".18" stroke-width="2"/>
+    </pattern>
+    <pattern id="planks" width="140" height="22" patternUnits="userSpaceOnUse">
+      <rect width="140" height="22" fill="#efd9b6"/>
+      <path d="M0 21.5 H140 M70 0 V22" stroke="#d2b48a" stroke-width="1.5"/>
+      <path d="M8 7 Q30 4 52 8 T96 7 M84 15 Q104 12 124 16" fill="none" stroke="#dcc29c" stroke-width="1.2"/>
+    </pattern>
+    <linearGradient id="floorShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a5a32" stop-opacity=".25"/><stop offset=".35" stop-color="#7a5a32" stop-opacity="0"/></linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7e3ee"/><stop offset=".5" stop-color="#a9bdcf"/><stop offset="1" stop-color="#8299ae"/></linearGradient>
+    <linearGradient id="metalLeg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6d8399"/><stop offset=".5" stop-color="#a3b6c8"/><stop offset="1" stop-color="#6d8399"/></linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9eff3"/></linearGradient>
+    <linearGradient id="pinkGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9ab4"/><stop offset="1" stop-color="#e8537a"/></linearGradient>
+    <radialGradient id="castShadow"><stop offset="0" stop-color="#3a2a15" stop-opacity=".35"/><stop offset="1" stop-color="#3a2a15" stop-opacity="0"/></radialGradient>
+    <!-- skin and hair -->
+    <radialGradient id="skinChild" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fbdcbc"/><stop offset=".7" stop-color="#f0c59b"/><stop offset="1" stop-color="#dcab7f"/></radialGradient>
+    <radialGradient id="skinNurse" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e9bd96"/><stop offset=".7" stop-color="#d6a37a"/><stop offset="1" stop-color="#bb8a62"/></radialGradient>
+    <radialGradient id="skinVet" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fbdcbc"/><stop offset=".7" stop-color="#f0c59b"/><stop offset="1" stop-color="#d9a97d"/></radialGradient>
+    <linearGradient id="hairChild" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a5a35"/><stop offset="1" stop-color="#4f2f18"/></linearGradient>
+    <linearGradient id="hairNurse" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4242"/><stop offset="1" stop-color="#1c1818"/></linearGradient>
+    <linearGradient id="hairVet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a7743f"/><stop offset="1" stop-color="#6a421e"/></linearGradient>
+    <!-- clothes -->
+    <linearGradient id="topChild" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb3cb"/><stop offset="1" stop-color="#ee7aa0"/></linearGradient>
+    <linearGradient id="skirtChild" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c993e2"/><stop offset="1" stop-color="#8f52b5"/></linearGradient>
+    <linearGradient id="coatNurse" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#f3f7fa"/><stop offset="1" stop-color="#d5e2eb"/></linearGradient>
+    <linearGradient id="coatVet" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9fe2da"/><stop offset=".6" stop-color="#7fd1c7"/><stop offset="1" stop-color="#58afa4"/></linearGradient>
+    <linearGradient id="pantsNurse" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#78d3c8"/><stop offset="1" stop-color="#43a397"/></linearGradient>
+    <linearGradient id="pantsVet" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#53658a"/><stop offset="1" stop-color="#2a3550"/></linearGradient>
+    <linearGradient id="shoe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5a5a"/><stop offset="1" stop-color="#1e1e1e"/></linearGradient>
+    <pattern id="weave" width="6" height="6" patternUnits="userSpaceOnUse">
+      <path d="M0 6 L6 0 M-1 1 L1 -1 M5 7 L7 5" stroke="#ffffff" stroke-opacity=".13" stroke-width="1"/>
+      <path d="M0 0 L6 6" stroke="#000000" stroke-opacity=".04" stroke-width="1"/>
+    </pattern>
+    <!-- props -->
+    <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ee6b2"/><stop offset="1" stop-color="#2b9462"/></linearGradient>
+    <linearGradient id="bandGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe4ec"/><stop offset="1" stop-color="#f5b9ca"/></linearGradient>
+  </defs>
 
   <!-- ================= SCENE 1: CHILD ================= -->
   <g id="s1" class="scene">
-    <rect width="800" height="450" fill="#dff3fb"/>
-    <rect y="385" width="800" height="65" fill="#f3e2c7"/>
+    <rect width="800" height="450" fill="url(#wallBlue)"/>
+    <rect width="800" height="385" fill="url(#wallTex)"/>
+    <rect y="385" width="800" height="65" fill="url(#planks)"/>
+    <rect y="385" width="800" height="65" fill="url(#floorShade)"/>
+    <rect y="374" width="800" height="12" fill="#ffffff"/><rect y="384" width="800" height="2" fill="#c9b08a" opacity=".6"/>
     <!-- wall poster -->
-    <rect x="60" y="50" width="130" height="100" rx="10" fill="#fff" stroke="#9fc5da" stroke-width="4"/>
-    <rect x="113" y="68" width="24" height="64" rx="5" fill="#ff6f91"/>
-    <rect x="93" y="88" width="64" height="24" rx="5" fill="#ff6f91"/>
+    <rect x="60" y="50" width="130" height="100" rx="10" fill="url(#paper)" stroke="#9fc5da" stroke-width="4" filter="url(#softShadow)"/>
+    <rect x="113" y="68" width="24" height="64" rx="5" fill="url(#pinkGloss)"/>
+    <rect x="93" y="88" width="64" height="24" rx="5" fill="url(#pinkGloss)"/>
+    <rect x="116" y="70" width="5" height="22" rx="2.5" fill="#fff" opacity=".4"/>
     <!-- bench -->
-    <rect x="180" y="362" width="260" height="22" rx="8" fill="#9fb7c9"/>
-    <rect x="200" y="384" width="14" height="40" fill="#7d94a8"/><rect x="406" y="384" width="14" height="40" fill="#7d94a8"/>
+    <ellipse cx="310" cy="426" rx="150" ry="9" fill="url(#castShadow)"/>
+    <rect x="200" y="384" width="14" height="40" fill="url(#metalLeg)"/><rect x="406" y="384" width="14" height="40" fill="url(#metalLeg)"/>
+    <rect x="180" y="362" width="260" height="22" rx="8" fill="url(#metal)"/>
+    <rect x="186" y="364" width="248" height="3" rx="1.5" fill="#fff" opacity=".55"/>
 
     <!-- child (scaled so the adult reads bigger) -->
     <g transform="translate(300 362) scale(.7) translate(-300 -362)">
     <g class="breathe">
-      <!-- legs -->
-      <rect x="262" y="350" width="34" height="62" rx="14" fill="#f2c9a0"/>
-      <rect x="306" y="350" width="34" height="62" rx="14" fill="#f2c9a0"/>
-      <ellipse cx="274" cy="418" rx="24" ry="11" fill="#e85d75"/><ellipse cx="328" cy="418" rx="24" ry="11" fill="#e85d75"/>
-      <rect x="254" y="338" width="96" height="30" rx="14" fill="#4a6fa5"/>
-      <!-- shirt -->
-      <rect x="248" y="232" width="106" height="130" rx="32" fill="#ffb347"/>
+      <!-- long hair behind her shoulders -->
+      <path d="M246 176 Q234 250 258 270 Q300 284 342 270 Q366 250 354 176Z" fill="url(#hairChild)"/>
+      <!-- legs and Mary Jane shoes -->
+      <rect x="262" y="350" width="34" height="62" rx="14" fill="url(#skinChild)"/>
+      <rect x="306" y="350" width="34" height="62" rx="14" fill="url(#skinChild)"/>
+      <ellipse cx="274" cy="418" rx="24" ry="11" fill="url(#pinkGloss)"/><ellipse cx="328" cy="418" rx="24" ry="11" fill="url(#pinkGloss)"/>
+      <path d="M262 410 H288 M316 410 H342" stroke="#c43c66" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="268" cy="414" rx="7" ry="2.5" fill="#fff" opacity=".5"/><ellipse cx="322" cy="414" rx="7" ry="2.5" fill="#fff" opacity=".5"/>
+      <!-- top with a heart -->
+      <rect x="248" y="232" width="106" height="130" rx="32" fill="url(#topChild)"/>
+      <rect x="248" y="232" width="106" height="130" rx="32" fill="url(#weave)"/>
+      <path d="M274 236 Q300 254 326 236" fill="none" stroke="#e05f8b" stroke-width="4" stroke-linecap="round"/>
+      <path d="M300 300 C286 288 292 278 300 286 C308 278 314 288 300 300Z" fill="#fff" opacity=".85"/>
+      <!-- pleated skirt -->
+      <path d="M250 326 L350 326 L368 372 L232 372Z" fill="url(#skirtChild)"/>
+      <path d="M266 328 L258 371 M284 328 L281 371 M300 328 L300 371 M316 328 L319 371 M334 328 L342 371" stroke="#7a3f9e" stroke-opacity=".55" stroke-width="2"/>
+      <path d="M250 328 H350" stroke="#e0b8f0" stroke-width="3" stroke-linecap="round"/>
       <!-- other arm: hangs from the shoulder, elbow bent, hand resting on the lap -->
-      <path d="M250 258 L228 318 L262 350" fill="none" stroke="#f2c9a0" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="264" cy="351" r="12" fill="#f2c9a0"/>
-      <path d="M257 250 L249 264" stroke="#ffb347" stroke-width="32" stroke-linecap="round"/>
+      <path d="M250 258 L228 318 L262 350" fill="none" stroke="#e8b98e" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M248 262 L231 316 L258 342" fill="none" stroke="#fbdcbc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
+      <circle cx="264" cy="351" r="12" fill="url(#skinChild)"/>
+      <path d="M257 250 L249 264" stroke="#f590b3" stroke-width="32" stroke-linecap="round"/>
       <!-- vaccinated arm: same pose, sleeve rolled up to show the upper arm -->
-      <path d="M350 258 L372 318 L338 350" fill="none" stroke="#f2c9a0" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="336" cy="351" r="12" fill="#f2c9a0"/>
-      <path d="M343 250 L351 262" stroke="#ffb347" stroke-width="32" stroke-linecap="round"/>
-      <path d="M337.9 270.2 L366.1 259.8" stroke="#f29a2e" stroke-width="7" stroke-linecap="round"/>
+      <path d="M350 258 L372 318 L338 350" fill="none" stroke="#e8b98e" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M347 262 L366 316 L340 342" fill="none" stroke="#fbdcbc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
+      <circle cx="336" cy="351" r="12" fill="url(#skinChild)"/>
+      <path d="M343 250 L351 262" stroke="#f590b3" stroke-width="32" stroke-linecap="round"/>
+      <path d="M337.9 270.2 L366.1 259.8" stroke="#d9608a" stroke-width="7" stroke-linecap="round"/>
       <!-- head -->
-      <circle cx="300" cy="185" r="50" fill="#f2c9a0"/>
-      <path d="M250 180 Q252 130 300 132 Q350 130 350 180 Q330 152 300 156 Q270 152 250 180Z" fill="#5a3a22"/>
-      <circle cx="252" cy="190" r="9" fill="#f2c9a0"/><circle cx="348" cy="190" r="9" fill="#f2c9a0"/>
+      <rect x="290" y="226" width="20" height="14" fill="#e3b287"/>
+      <circle cx="300" cy="185" r="50" fill="url(#skinChild)"/>
+      <!-- bangs and side locks -->
+      <path d="M250 184 Q246 128 300 129 Q354 128 350 184 Q344 160 332 154 Q326 170 306 164 Q296 172 282 160 Q264 162 250 184Z" fill="url(#hairChild)"/>
+      <path d="M250 176 Q242 222 252 256 Q262 244 264 206Z" fill="url(#hairChild)"/>
+      <path d="M350 176 Q358 222 348 256 Q338 244 336 206Z" fill="url(#hairChild)"/>
+      <path d="M270 140 Q284 134 296 138 M312 137 Q326 136 336 144 M256 200 Q254 226 256 244 M344 200 Q346 226 344 244" fill="none" stroke="#b07a4c" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+      <!-- bow -->
+      <g transform="translate(336 142) rotate(18)">
+        <path d="M0 0 L-18 -11 L-18 11Z" fill="url(#pinkGloss)"/><path d="M0 0 L18 -11 L18 11Z" fill="url(#pinkGloss)"/>
+        <circle r="5" fill="#e8537a"/><path d="M-14 -6 L-6 -2" stroke="#fff" stroke-width="2" opacity=".6" stroke-linecap="round"/>
+      </g>
       <circle cx="274" cy="205" r="7" fill="#ff9aa8" opacity=".6"/><circle cx="326" cy="205" r="7" fill="#ff9aa8" opacity=".6"/>
       <g class="eyes-open"><circle cx="284" cy="186" r="6" fill="#2b2b2b"/><circle cx="316" cy="186" r="6" fill="#2b2b2b"/>
-        <circle cx="286" cy="184" r="2" fill="#fff"/><circle cx="318" cy="184" r="2" fill="#fff"/></g>
+        <circle cx="286" cy="184" r="2" fill="#fff"/><circle cx="318" cy="184" r="2" fill="#fff"/>
+        <path d="M279 181 L274 177 M281 179 L278 174 M321 181 L326 177 M319 179 L322 174" stroke="#2b2b2b" stroke-width="2" stroke-linecap="round"/></g>
       <g class="eyes-squint" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round">
         <path d="M277 181 L289 187 L277 193"/><path d="M323 181 L311 187 L323 193"/></g>
       <path class="m-idle" d="M288 208 Q300 218 312 208" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
@@ -163,7 +237,7 @@
 
     <!-- bandage on arm -->
     <g transform="translate(368 287) rotate(70)"><g class="bandage">
-      <rect x="-24" y="-10" width="48" height="20" rx="8" fill="#ffd6e0" stroke="#e58aa0" stroke-width="2"/>
+      <rect x="-24" y="-10" width="48" height="20" rx="8" fill="url(#bandGrad)" stroke="#e58aa0" stroke-width="2"/>
       <rect x="-9" y="-10" width="18" height="20" fill="#fff"/>
       <path d="M0 -5 l2 4 4 .5 -3 3 .8 4.5 -3.8 -2.2 -3.8 2.2 .8 -4.5 -3 -3 4 -.5z" fill="#ffc400"/>
     </g></g>
@@ -173,30 +247,36 @@
     <g class="helper" data-kind="nurse"></g>
 
     <!-- speech bubbles -->
-    <g class="bub bub-poke"><rect x="95" y="215" width="150" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
+    <g class="bub bub-poke"><rect x="95" y="215" width="150" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3" filter="url(#softShadow)"/>
       <text x="170" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Pinch! Quick!</text></g>
-    <g class="bub bub-done"><rect x="40" y="215" width="210" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
+    <g class="bub bub-done"><rect x="40" y="215" width="210" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3" filter="url(#softShadow)"/>
       <text x="145" y="245" text-anchor="middle" font-size="21" font-weight="bold" fill="#2b3a55">That wasn't so bad!</text></g>
 
     <!-- protected shield -->
     <g transform="translate(140 265)"><g class="shield">
-      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="#4cc38a" stroke="#2c8f61" stroke-width="5"/>
+      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="url(#shieldGrad)" stroke="#2c8f61" stroke-width="5" filter="url(#softShadow)"/>
+      <path d="M-40 -36 L0 -52 L0 40 Q-36 12 -40 -36Z" fill="#fff" opacity=".18"/>
       <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
     </g></g>
   </g>
 
   <!-- ================= SCENE 2: PUPPY ================= -->
   <g id="s2" class="scene">
-    <rect width="800" height="450" fill="#e6f7e9"/>
-    <rect y="385" width="800" height="65" fill="#f3e2c7"/>
+    <rect width="800" height="450" fill="url(#wallGreen)"/>
+    <rect width="800" height="385" fill="url(#wallTex)"/>
+    <rect y="385" width="800" height="65" fill="url(#planks)"/>
+    <rect y="385" width="800" height="65" fill="url(#floorShade)"/>
+    <rect y="374" width="800" height="12" fill="#ffffff"/><rect y="384" width="800" height="2" fill="#c9b08a" opacity=".6"/>
     <!-- poster: paw -->
-    <rect x="60" y="50" width="130" height="100" rx="10" fill="#fff" stroke="#9fd0ab" stroke-width="4"/>
-    <ellipse cx="125" cy="108" rx="20" ry="16" fill="#ff6f91"/>
-    <circle cx="97" cy="84" r="8" fill="#ff6f91"/><circle cx="115" cy="73" r="8" fill="#ff6f91"/>
-    <circle cx="135" cy="73" r="8" fill="#ff6f91"/><circle cx="153" cy="84" r="8" fill="#ff6f91"/>
+    <rect x="60" y="50" width="130" height="100" rx="10" fill="url(#paper)" stroke="#9fd0ab" stroke-width="4" filter="url(#softShadow)"/>
+    <ellipse cx="125" cy="108" rx="20" ry="16" fill="url(#pinkGloss)"/>
+    <circle cx="97" cy="84" r="8" fill="url(#pinkGloss)"/><circle cx="115" cy="73" r="8" fill="url(#pinkGloss)"/>
+    <circle cx="135" cy="73" r="8" fill="url(#pinkGloss)"/><circle cx="153" cy="84" r="8" fill="url(#pinkGloss)"/>
     <!-- exam table -->
-    <rect x="150" y="372" width="290" height="26" rx="10" fill="#b8c7d6"/>
-    <rect x="190" y="398" width="16" height="40" fill="#8aa0b4"/><rect x="400" y="398" width="16" height="40" fill="#8aa0b4"/>
+    <ellipse cx="295" cy="440" rx="160" ry="9" fill="url(#castShadow)"/>
+    <rect x="190" y="398" width="16" height="40" fill="url(#metalLeg)"/><rect x="400" y="398" width="16" height="40" fill="url(#metalLeg)"/>
+    <rect x="150" y="372" width="290" height="26" rx="10" fill="url(#metal)"/>
+    <rect x="156" y="374" width="278" height="3" rx="1.5" fill="#fff" opacity=".55"/>
 
     <!-- puppy (scaled to sit naturally beside an adult) -->
     <g transform="translate(318 372) scale(.7) translate(-318 -372)">
@@ -284,7 +364,7 @@
 
     <!-- bandage with paw -->
     <g transform="translate(380 256) rotate(-30)"><g class="bandage">
-      <rect x="-26" y="-11" width="52" height="22" rx="9" fill="#ffd6e0" stroke="#e58aa0" stroke-width="2"/>
+      <rect x="-26" y="-11" width="52" height="22" rx="9" fill="url(#bandGrad)" stroke="#e58aa0" stroke-width="2"/>
       <rect x="-10" y="-11" width="20" height="22" fill="#fff"/>
       <ellipse cx="0" cy="2" rx="4" ry="3.2" fill="#ff6f91"/>
       <circle cx="-5" cy="-3" r="1.6" fill="#ff6f91"/><circle cx="0" cy="-5" r="1.6" fill="#ff6f91"/><circle cx="5" cy="-3" r="1.6" fill="#ff6f91"/>
@@ -302,13 +382,14 @@
     <g class="helper" data-kind="vet"></g>
 
     <!-- bubbles -->
-    <g class="bub bub-poke"><rect x="60" y="215" width="120" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
+    <g class="bub bub-poke"><rect x="45" y="215" width="150" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3" filter="url(#softShadow)"/>
       <text x="120" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Yip! Pinch!</text></g>
-    <g class="bub bub-done"><rect x="20" y="215" width="190" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
+    <g class="bub bub-done"><rect x="20" y="215" width="190" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3" filter="url(#softShadow)"/>
       <text x="115" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Woof! I'm brave!</text></g>
 
     <g transform="translate(140 265)"><g class="shield">
-      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="#4cc38a" stroke="#2c8f61" stroke-width="5"/>
+      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="url(#shieldGrad)" stroke="#2c8f61" stroke-width="5" filter="url(#softShadow)"/>
+      <path d="M-40 -36 L0 -52 L0 40 Q-36 12 -40 -36Z" fill="#fff" opacity=".18"/>
       <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
     </g></g>
   </g>
@@ -328,6 +409,7 @@
     '<circle class="hand" cx="158" cy="0" r="19"/></g>' +
     '<rect x="34" y="-11" width="68" height="22" rx="4" fill="#eaf6ff" stroke="#5b7388" stroke-width="2.5"/>' +
     '<rect class="liquid" x="38" y="-7" width="60" height="14" fill="#ff6fa5"/>' +
+    '<rect x="38" y="-9" width="56" height="3" rx="1.5" fill="#fff" opacity=".7"/>' +
     '<rect x="94" y="-14" width="5" height="28" rx="2" fill="#5b7388"/>' +
     '<rect x="26" y="-5" width="9" height="10" fill="#8aa0b4"/>' +
     '<line x1="0" y1="0" x2="27" y2="0" stroke="#8d99a6" stroke-width="3" stroke-linecap="round"/>';
@@ -335,14 +417,17 @@
   // Adult helper figure, built around x = 0 and placed at HELPER_X.
   var HELPER_X = 470;
   var LOOKS = {
-    nurse: { coat: '#ffffff', line: '#b9d3e3', shirt: '#7fd1c7', pants: '#5bbfb3', skin: '#d9a77f', hair: '#2f2a2a' },
-    vet:   { coat: '#7fd1c7', line: '#4fa89d', shirt: '#ffffff', pants: '#3b4a66', skin: '#f2c9a0', hair: '#8a5a2b' }
+    nurse: { coat: '#ffffff', line: '#b9d3e3', shirt: '#7fd1c7', pants: '#5bbfb3', skin: '#d9a77f', hair: '#2f2a2a',
+             coatFill: 'url(#coatNurse)', pantsFill: 'url(#pantsNurse)', skinFill: 'url(#skinNurse)', hairFill: 'url(#hairNurse)', sheen: '#ffffff', fold: '#c7d8e4' },
+    vet:   { coat: '#7fd1c7', line: '#4fa89d', shirt: '#ffffff', pants: '#3b4a66', skin: '#f2c9a0', hair: '#8a5a2b',
+             coatFill: 'url(#coatVet)', pantsFill: 'url(#pantsVet)', skinFill: 'url(#skinVet)', hairFill: 'url(#hairVet)', sheen: '#c4f0ea', fold: '#5fb4a9' }
   };
   function helperSVG(kind) {
     var c = LOOKS[kind];
     var limb = function (d, w) {
       return '<path d="' + d + '" fill="none" stroke="' + c.line + '" stroke-width="' + (w + 6) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
-             '<path d="' + d + '" fill="none" stroke="' + c.coat + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>';
+             '<path d="' + d + '" fill="none" stroke="' + c.coat + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+             '<path d="' + d + '" fill="none" stroke="' + c.sheen + '" stroke-opacity=".6" stroke-width="' + (w / 3) + '" stroke-linecap="round" stroke-linejoin="round" transform="translate(-3 -1)"/>';
     };
     // 3/4 view facing left (toward the patient). Face, collar and coat opening sit toward the left;
     // only the far-side ear shows. The leading (far) arm does the work; the near arm hangs relaxed.
@@ -361,23 +446,28 @@
       '<g class="arm">' + limb('', 18) + '</g>' +
       '<g transform="translate(' + HELPER_X + ' 0)">' +
       // legs: far leg a touch darker and set back; shoes point toward the patient
-      '<rect x="-24" y="300" width="20" height="116" rx="9" fill="' + c.pants + '" style="filter: brightness(.85)"/>' +
-      '<ellipse cx="-24" cy="419" rx="18" ry="8" fill="#2c2c2c"/>' +
-      '<rect x="-2" y="300" width="21" height="118" rx="9" fill="' + c.pants + '"/>' +
-      '<ellipse cx="0" cy="421" rx="19" ry="8" fill="#3a3a3a"/>' +
+      '<ellipse cx="-6" cy="425" rx="48" ry="7" fill="url(#castShadow)"/>' +
+      '<rect x="-24" y="300" width="20" height="116" rx="9" fill="' + c.pantsFill + '" style="filter: brightness(.85)"/>' +
+      '<ellipse cx="-24" cy="419" rx="18" ry="8" fill="url(#shoe)"/>' +
+      '<rect x="-2" y="300" width="21" height="118" rx="9" fill="' + c.pantsFill + '"/>' +
+      '<path d="M8 304 V412" stroke="#000" stroke-opacity=".12" stroke-width="2"/>' +
+      '<ellipse cx="0" cy="421" rx="19" ry="8" fill="url(#shoe)"/><ellipse cx="-6" cy="417" rx="7" ry="2" fill="#fff" opacity=".35"/>' +
       // neck and coat
-      '<rect x="-14" y="106" width="18" height="28" fill="' + c.skin + '"/>' +
-      '<path d="M-34 146 Q-32 131 -18 129 L22 129 Q40 131 42 146 L48 332 L-44 332Z" fill="' + c.coat + '" stroke="' + c.line + '" stroke-width="3"/>' +
+      '<rect x="-14" y="106" width="18" height="28" fill="' + c.skinFill + '"/><rect x="-14" y="106" width="18" height="10" fill="#000" opacity=".12"/>' +
+      '<path d="M-34 146 Q-32 131 -18 129 L22 129 Q40 131 42 146 L48 332 L-44 332Z" fill="' + c.coatFill + '" stroke="' + c.line + '" stroke-width="3"/>' +
+      '<path d="M-34 146 Q-32 131 -18 129 L22 129 Q40 131 42 146 L48 332 L-44 332Z" fill="url(#weave)"/>' +
+      '<path d="M-30 200 Q-28 260 -38 320 M30 210 Q34 270 40 324 M-2 236 Q2 280 0 326" fill="none" stroke="' + c.fold + '" stroke-width="2" stroke-linecap="round" opacity=".8"/>' +
       '<path d="M-24 129 L-12 164 L2 129Z" fill="' + c.shirt + '"/>' +
       '<path d="M-24 129 L-16 188 M2 129 L-8 188 M-12 164 L-12 332" fill="none" stroke="' + c.line + '" stroke-width="3"/>' +
       '<rect x="8" y="245" width="22" height="18" rx="3" fill="none" stroke="' + c.line + '" stroke-width="3"/>' + steth +
-      '<g class="idle-arm">' + limb(nearArm, 18) + '<circle cx="31" cy="275" r="11.4" fill="' + c.skin + '"/></g>' +
+      '<g class="idle-arm">' + limb(nearArm, 18) + '<circle cx="31" cy="275" r="11.4" fill="' + c.skinFill + '"/></g>' +
       // head turned toward the patient
-      '<circle cx="24" cy="86" r="7" fill="' + c.skin + '"/>' +
-      '<circle cx="-4" cy="80" r="36" fill="' + c.skin + '"/>' +
-      '<circle cx="-39" cy="88" r="5" fill="' + c.skin + '"/>' +
-      '<path d="M-38 70 Q-36 40 -4 41 Q34 40 34 80 Q34 96 26 104 Q28 80 18 66 Q-8 58 -38 70Z" fill="' + c.hair + '"/>' + cap +
-      '<circle cx="24" cy="86" r="7" fill="' + c.skin + '"/>' +
+      '<circle cx="24" cy="86" r="7" fill="' + c.skinFill + '"/>' +
+      '<circle cx="-4" cy="80" r="36" fill="' + c.skinFill + '"/>' +
+      '<circle cx="-39" cy="88" r="5" fill="' + c.skinFill + '"/>' +
+      '<path d="M-38 70 Q-36 40 -4 41 Q34 40 34 80 Q34 96 26 104 Q28 80 18 66 Q-8 58 -38 70Z" fill="' + c.hairFill + '"/>' +
+      '<path d="M-26 52 Q-8 46 12 52 M-30 60 Q-14 54 4 58 M20 60 Q28 72 28 88" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2" stroke-linecap="round"/>' + cap +
+      '<circle cx="24" cy="86" r="7" fill="' + c.skinFill + '"/>' +
       '<ellipse cx="-26" cy="82" rx="3.5" ry="4.5" fill="#2b2b2b"/><circle cx="-6" cy="82" r="4.5" fill="#2b2b2b"/>' +
       '<circle cx="2" cy="95" r="5.5" fill="#ff9aa8" opacity=".5"/>' +
       '<path d="M-26 97 Q-18 104 -10 97" fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"/>' +
@@ -390,7 +480,7 @@
   var rigs = [0, 1].map(function (i) {
     var host = scenes[i].querySelector('.helper');
     host.innerHTML = helperSVG(host.dataset.kind);
-    host.querySelector('.hand').setAttribute('fill', LOOKS[host.dataset.kind].skin);
+    host.querySelector('.hand').setAttribute('fill', LOOKS[host.dataset.kind].skinFill);
     return { host: host, pose: null, from: null, to: null, t0: 0, dur: 1 };
   });
 
