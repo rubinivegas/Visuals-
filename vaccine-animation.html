@@ -25,7 +25,6 @@
     padding: 16px;
     gap: 12px;
   }
-  h1 { margin: 4px 0 0; font-size: clamp(1.4rem, 4vw, 2.2rem); text-align: center; }
   .stage {
     width: min(100%, 900px);
     background: var(--card);
@@ -45,18 +44,6 @@
     justify-content: center;
     transition: opacity .3s;
   }
-  button {
-    font: inherit;
-    font-size: 1.1rem;
-    padding: 10px 26px;
-    border: 0;
-    border-radius: 999px;
-    background: var(--accent);
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 4px 0 var(--accent-dark);
-  }
-  button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-dark); }
 
   /* ---------- scenes ---------- */
   .scene { opacity: 0; transition: opacity .7s; pointer-events: none; }
@@ -84,6 +71,7 @@
 
   .idle-arm { transform-box: fill-box; transform-origin: 50% 0; animation: sway 3.2s ease-in-out infinite; }
   @keyframes sway { 50% { transform: rotate(-3deg); } }
+  .snap * { transition: none !important; }
   .plunger { transition: transform 1s ease-in; }
   .poke .plunger { transform: translateX(-48px); }
   .liquid { transform-box: fill-box; transform-origin: left center; transition: transform 1s ease-in; }
@@ -104,18 +92,14 @@
   g:nth-child(2) > .heart { animation-delay: .7s; }
   g:nth-child(3) > .heart { animation-delay: 1.4s; }
   @keyframes floatup { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-70px); opacity: 0; } }
-  .bounce { animation: bounce 1s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
-  @keyframes bounce { 50% { transform: translateY(-14px); } }
   text { font-family: "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif; }
 
   @media (prefers-reduced-motion: reduce) {
-    .breathe, .idle-arm, .tail, .ear-l, .ear-r, .heart, .bounce { animation: none; }
+    .breathe, .idle-arm, .tail, .ear-l, .ear-r, .heart { animation: none; }
   }
 </style>
 </head>
 <body>
-<h1>Vaccines Help Everyone!</h1>
-
 <div class="stage">
 <svg id="svg" viewBox="0 0 800 450" role="img" aria-label="Animation of a child and then a puppy getting vaccines">
 
@@ -141,11 +125,15 @@
       <rect x="254" y="338" width="96" height="30" rx="14" fill="#4a6fa5"/>
       <!-- shirt -->
       <rect x="248" y="232" width="106" height="130" rx="32" fill="#ffb347"/>
-      <!-- other arm -->
-      <rect x="236" y="250" width="26" height="90" rx="13" fill="#f2c9a0"/>
-      <!-- vaccinated arm -->
-      <rect x="338" y="262" width="108" height="34" rx="17" fill="#f2c9a0"/>
-      <rect x="326" y="254" width="34" height="50" rx="12" fill="#ffb347"/>
+      <!-- other arm: hangs from the shoulder, elbow bent, hand resting on the lap -->
+      <path d="M250 258 L228 318 L262 350" fill="none" stroke="#f2c9a0" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="264" cy="351" r="12" fill="#f2c9a0"/>
+      <path d="M257 250 L249 264" stroke="#ffb347" stroke-width="32" stroke-linecap="round"/>
+      <!-- vaccinated arm: same pose, sleeve rolled up to show the upper arm -->
+      <path d="M350 258 L372 318 L338 350" fill="none" stroke="#f2c9a0" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="336" cy="351" r="12" fill="#f2c9a0"/>
+      <path d="M343 250 L351 262" stroke="#ffb347" stroke-width="32" stroke-linecap="round"/>
+      <path d="M337.9 270.2 L366.1 259.8" stroke="#f29a2e" stroke-width="7" stroke-linecap="round"/>
       <!-- head -->
       <circle cx="300" cy="185" r="50" fill="#f2c9a0"/>
       <path d="M250 180 Q252 130 300 132 Q350 130 350 180 Q330 152 300 156 Q270 152 250 180Z" fill="#5a3a22"/>
@@ -162,7 +150,7 @@
     </g>
 
     <!-- bandage on arm -->
-    <g transform="translate(398 262) rotate(-10)"><g class="bandage">
+    <g transform="translate(368 287) rotate(70)"><g class="bandage">
       <rect x="-24" y="-10" width="48" height="20" rx="8" fill="#ffd6e0" stroke="#e58aa0" stroke-width="2"/>
       <rect x="-9" y="-10" width="18" height="20" fill="#fff"/>
       <path d="M0 -5 l2 4 4 .5 -3 3 .8 4.5 -3.8 -2.2 -3.8 2.2 .8 -4.5 -3 -3 4 -.5z" fill="#ffc400"/>
@@ -195,8 +183,8 @@
     <circle cx="97" cy="84" r="8" fill="#ff6f91"/><circle cx="115" cy="73" r="8" fill="#ff6f91"/>
     <circle cx="135" cy="73" r="8" fill="#ff6f91"/><circle cx="153" cy="84" r="8" fill="#ff6f91"/>
     <!-- exam table -->
-    <rect x="150" y="372" width="300" height="26" rx="10" fill="#b8c7d6"/>
-    <rect x="190" y="398" width="16" height="40" fill="#8aa0b4"/><rect x="410" y="398" width="16" height="40" fill="#8aa0b4"/>
+    <rect x="150" y="372" width="290" height="26" rx="10" fill="#b8c7d6"/>
+    <rect x="190" y="398" width="16" height="40" fill="#8aa0b4"/><rect x="400" y="398" width="16" height="40" fill="#8aa0b4"/>
 
     <!-- puppy (scaled to sit naturally beside an adult) -->
     <g transform="translate(318 372) scale(.7) translate(-318 -372)">
@@ -284,25 +272,9 @@
     </g></g>
   </g>
 
-  <!-- ================= SCENE 3: TOGETHER ================= -->
-  <g id="s3" class="scene">
-    <rect width="800" height="450" fill="#fff0c9"/>
-    <g font-size="130" text-anchor="middle">
-      <text class="bounce" x="230" y="270">🧒</text>
-      <text class="bounce" x="570" y="270" style="animation-delay:.3s">🐶</text>
-    </g>
-    <g transform="translate(400 215)">
-      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="#4cc38a" stroke="#2c8f61" stroke-width="5"/>
-      <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-    </g>
-    <text x="400" y="360" text-anchor="middle" font-size="38" font-weight="bold" fill="#2b3a55">Vaccines keep kids AND puppies healthy!</text>
-    <text x="400" y="405" text-anchor="middle" font-size="26" fill="#2b3a55">❤️ Healthy friends play together ❤️</text>
-  </g>
 </svg>
 <div class="caption" id="caption" aria-live="polite"></div>
 </div>
-
-<button id="replay" type="button">↻ Watch again</button>
 
 <script>
 (function () {
@@ -318,7 +290,7 @@
     '<line x1="0" y1="0" x2="27" y2="0" stroke="#8d99a6" stroke-width="3" stroke-linecap="round"/>';
 
   // Adult helper figure, built around x = 0 and placed at HELPER_X.
-  var HELPER_X = 505;
+  var HELPER_X = 470;
   var LOOKS = {
     nurse: { coat: '#ffffff', line: '#b9d3e3', shirt: '#7fd1c7', pants: '#5bbfb3', skin: '#d9a77f', hair: '#2f2a2a' },
     vet:   { coat: '#7fd1c7', line: '#4fa89d', shirt: '#ffffff', pants: '#3b4a66', skin: '#f2c9a0', hair: '#8a5a2b' }
@@ -370,7 +342,7 @@
       '<g class="syrpose"><g style="transform: scale(.6)">' + syringe + '</g></g>');
   }
 
-  var scenes = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+  var scenes = [document.getElementById('s1'), document.getElementById('s2')];
   var svgEl = document.getElementById('svg');
   var rigs = [0, 1].map(function (i) {
     var host = scenes[i].querySelector('.helper');
@@ -382,15 +354,15 @@
   // Poses place the hand (x, y) and the syringe angle a (degrees). Blending hand positions keeps
   // every in-between frame inside the arm's reach, so the arm never has to stretch.
   var GRIP = 158 * 0.6;              // tip -> hand distance at this scale
-  var SHOT = [{ x: 369, y: 292 }, { x: 361, y: 289 }];   // child's arm, puppy's shoulder
+  var SHOT = [{ x: 350, y: 307 }, { x: 361, y: 289 }];   // child's upper arm, puppy's shoulder
   var PUSH = 48 * 0.6;               // how far the thumb travels when the plunger is pressed
   function restPose(i) {             // arm hanging relaxed, syringe held low by the hip
     // after the shot the plunger stays pressed, so offset the grip to keep the thumb at the same spot
-    var a = -95, r = a * Math.PI / 180, push = i != null && scenes[i].classList.contains('poke') ? PUSH : 0;
+    var a = -110, r = a * Math.PI / 180, push = i != null && scenes[i].classList.contains('poke') ? PUSH : 0;
     return { x: HELPER_X - 46 + push * Math.cos(r), y: 266 + push * Math.sin(r), a: a };
   }
   function shotPose(i, back) {       // hand on the line of the needle, `back` px from the skin
-    var a = -55, r = a * Math.PI / 180;
+    var a = -60, r = a * Math.PI / 180;
     return { x: SHOT[i].x + (GRIP + back) * Math.cos(r), y: SHOT[i].y + (GRIP + back) * Math.sin(r), a: a };
   }
   function moveTo(i, pose, dur) {
@@ -437,12 +409,18 @@
     scenes.forEach(function (s, k) { s.classList.toggle('active', k === i); });
   }
   function reset() {
-    scenes.forEach(function (s) { s.classList.remove('approach', 'poke', 'done', 'shielded'); });
+    // snap everything back instantly (no transitions) so the loop restarts cleanly
+    scenes.forEach(function (s) {
+      s.classList.add('snap');
+      s.classList.remove('approach', 'poke', 'done', 'shielded');
+    });
+    void svgEl.getBoundingClientRect();
+    scenes.forEach(function (s) { s.classList.remove('snap'); });
     rigs.forEach(function (rig) { rig.pose = restPose(); rig.to = null; });
   }
   function step(i, cls) {
     scenes[i].classList.add(cls);
-    if (cls === 'approach') moveTo(i, shotPose(i, 35), 1400);
+    if (cls === 'approach') moveTo(i, shotPose(i, 25), 1400);
     if (cls === 'poke') moveTo(i, shotPose(i, 0), 500);
     if (cls === 'done') moveTo(i, restPose(i), 1300);
   }
@@ -467,11 +445,10 @@
     at(23700, function () { say('All done! Good boy, Biscuit! A paw-print bandage! 🐾'); step(1, 'done'); });
     at(27000, function () { say('Now Biscuit is protected from germs too. 🛡️'); step(1, 'shielded'); });
 
-    // --- together ---
-    at(31000, function () { show(2); say('Just like kids, dogs need vaccines to stay healthy and play with us!'); });
+    // --- start over ---
+    at(31000, play);
   }
 
-  document.getElementById('replay').addEventListener('click', play);
   play();
   requestAnimationFrame(frame);
 })();
