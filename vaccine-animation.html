@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vaccines Help Everyone!</title>
+<style>
+  :root {
+    --ink: #2b3a55;
+    --bg: #fff6e5;
+    --card: #ffffff;
+    --accent: #ff6f91;
+    --accent-dark: #d94a6f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    gap: 12px;
+  }
+  h1 { margin: 4px 0 0; font-size: clamp(1.4rem, 4vw, 2.2rem); text-align: center; }
+  .stage {
+    width: min(100%, 900px);
+    background: var(--card);
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(43, 58, 85, .18);
+    overflow: hidden;
+  }
+  svg { display: block; width: 100%; height: auto; }
+  .caption {
+    min-height: 4.6em;
+    padding: 14px 20px;
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+    text-align: center;
+    background: #eaf6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity .3s;
+  }
+  button {
+    font: inherit;
+    font-size: 1.1rem;
+    padding: 10px 26px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--accent-dark);
+  }
+  button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-dark); }
+
+  /* ---------- scenes ---------- */
+  .scene { opacity: 0; transition: opacity .7s; pointer-events: none; }
+  .scene.active { opacity: 1; }
+
+  /* faces: states accumulate (idle -> approach -> poke -> done), later rules win */
+  .m-worry, .m-ouch, .m-happy, .eyes-squint, .bub, .shield, .hearts { display: none; }
+  .approach .m-idle { display: none; }
+  .approach .m-worry { display: inline; }
+  .poke .m-worry { display: none; }
+  .poke .m-ouch { display: inline; }
+  .poke .eyes-open { display: none; }
+  .poke .eyes-squint { display: inline; }
+  .poke .bub-poke { display: inline; }
+  .done .m-ouch { display: none; }
+  .done .m-happy { display: inline; }
+  .done .eyes-squint { display: none; }
+  .done .eyes-open { display: inline; }
+  .done .bub-poke { display: none; }
+  .done .bub-done { display: inline; }
+  .done .hearts { display: inline; }
+  .shield { display: inline; opacity: 0; transform: scale(0); transform-box: fill-box; transform-origin: center; transition: transform .6s cubic-bezier(.3, 1.6, .5, 1), opacity .3s; }
+  .shielded .shield { opacity: 1; transform: scale(1); }
+  .shielded .bub-done { display: none; }
+
+  /* syringe moves along its own axis (local +x points back toward the helper) */
+  .syr { transform: translateX(260px); transition: transform 1.4s ease-in-out; }
+  .approach .syr { transform: translateX(110px); }
+  .poke .syr { transform: translateX(0); transition-duration: .5s; }
+  .done .syr { transform: translateX(260px); transition-duration: 1.2s; }
+  .plunger { transition: transform 1s ease-in; }
+  .poke .plunger { transform: translateX(-48px); }
+  .liquid { transform-box: fill-box; transform-origin: left center; transition: transform 1s ease-in; }
+  .poke .liquid { transform: scaleX(.12); }
+  .bandage { opacity: 0; transform: scale(.3); transform-box: fill-box; transform-origin: center; transition: opacity .4s, transform .4s cubic-bezier(.3, 1.6, .5, 1); }
+  .done .bandage { opacity: 1; transform: scale(1); }
+
+  /* idle life */
+  .breathe { animation: breathe 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
+  @keyframes breathe { 50% { transform: scaleY(1.02); } }
+  .tail { transform-box: view-box; transform-origin: 250px 320px; animation: wag 1.4s ease-in-out infinite; }
+  .done .tail { animation-duration: .25s; }
+  @keyframes wag { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg); } }
+  .ear-l { transform-box: fill-box; transform-origin: center top; animation: ear 2s ease-in-out infinite; }
+  .ear-r { transform-box: fill-box; transform-origin: center top; animation: ear 2s ease-in-out infinite reverse; }
+  @keyframes ear { 50% { transform: rotate(5deg); } }
+  .heart { animation: floatup 2.2s ease-in infinite; opacity: 0; }
+  g:nth-child(2) > .heart { animation-delay: .7s; }
+  g:nth-child(3) > .heart { animation-delay: 1.4s; }
+  @keyframes floatup { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-70px); opacity: 0; } }
+  .bounce { animation: bounce 1s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
+  @keyframes bounce { 50% { transform: translateY(-14px); } }
+  text { font-family: "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .breathe, .tail, .ear-l, .ear-r, .heart, .bounce { animation: none; }
+  }
+</style>
+</head>
+<body>
+<h1>Vaccines Help Everyone!</h1>
+
+<div class="stage">
+<svg id="svg" viewBox="0 0 800 450" role="img" aria-label="Animation of a child and then a puppy getting vaccines">
+
+  <!-- ================= SCENE 1: CHILD ================= -->
+  <g id="s1" class="scene">
+    <rect width="800" height="450" fill="#dff3fb"/>
+    <rect y="385" width="800" height="65" fill="#f3e2c7"/>
+    <!-- wall poster -->
+    <rect x="60" y="50" width="130" height="100" rx="10" fill="#fff" stroke="#9fc5da" stroke-width="4"/>
+    <rect x="113" y="68" width="24" height="64" rx="5" fill="#ff6f91"/>
+    <rect x="93" y="88" width="64" height="24" rx="5" fill="#ff6f91"/>
+    <!-- bench -->
+    <rect x="180" y="362" width="260" height="22" rx="8" fill="#9fb7c9"/>
+    <rect x="200" y="384" width="14" height="40" fill="#7d94a8"/><rect x="406" y="384" width="14" height="40" fill="#7d94a8"/>
+
+    <!-- child -->
+    <g class="breathe">
+      <!-- legs -->
+      <rect x="262" y="350" width="34" height="62" rx="14" fill="#f2c9a0"/>
+      <rect x="306" y="350" width="34" height="62" rx="14" fill="#f2c9a0"/>
+      <ellipse cx="274" cy="418" rx="24" ry="11" fill="#e85d75"/><ellipse cx="328" cy="418" rx="24" ry="11" fill="#e85d75"/>
+      <rect x="254" y="338" width="96" height="30" rx="14" fill="#4a6fa5"/>
+      <!-- shirt -->
+      <rect x="248" y="232" width="106" height="130" rx="32" fill="#ffb347"/>
+      <!-- other arm -->
+      <rect x="236" y="250" width="26" height="90" rx="13" fill="#f2c9a0"/>
+      <!-- vaccinated arm -->
+      <rect x="338" y="262" width="108" height="34" rx="17" fill="#f2c9a0"/>
+      <rect x="326" y="254" width="34" height="50" rx="12" fill="#ffb347"/>
+      <!-- head -->
+      <circle cx="300" cy="185" r="50" fill="#f2c9a0"/>
+      <path d="M250 180 Q252 130 300 132 Q350 130 350 180 Q330 152 300 156 Q270 152 250 180Z" fill="#5a3a22"/>
+      <circle cx="252" cy="190" r="9" fill="#f2c9a0"/><circle cx="348" cy="190" r="9" fill="#f2c9a0"/>
+      <circle cx="274" cy="205" r="7" fill="#ff9aa8" opacity=".6"/><circle cx="326" cy="205" r="7" fill="#ff9aa8" opacity=".6"/>
+      <g class="eyes-open"><circle cx="284" cy="186" r="6" fill="#2b2b2b"/><circle cx="316" cy="186" r="6" fill="#2b2b2b"/>
+        <circle cx="286" cy="184" r="2" fill="#fff"/><circle cx="318" cy="184" r="2" fill="#fff"/></g>
+      <g class="eyes-squint" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round">
+        <path d="M277 181 L289 187 L277 193"/><path d="M323 181 L311 187 L323 193"/></g>
+      <path class="m-idle" d="M288 208 Q300 218 312 208" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+      <path class="m-worry" d="M289 212 Q300 205 311 212" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+      <ellipse class="m-ouch" cx="300" cy="211" rx="8" ry="10" fill="#8a2b3a"/>
+      <g class="m-happy"><path d="M282 204 Q300 232 318 204Z" fill="#8a2b3a"/><path d="M289 214 Q300 222 311 214 Q300 211 289 214Z" fill="#ff7a8a"/></g>
+    </g>
+
+    <!-- bandage on arm -->
+    <g transform="translate(398 262) rotate(-10)"><g class="bandage">
+      <rect x="-24" y="-10" width="48" height="20" rx="8" fill="#ffd6e0" stroke="#e58aa0" stroke-width="2"/>
+      <rect x="-9" y="-10" width="18" height="20" fill="#fff"/>
+      <path d="M0 -5 l2 4 4 .5 -3 3 .8 4.5 -3.8 -2.2 -3.8 2.2 .8 -4.5 -3 -3 4 -.5z" fill="#ffc400"/>
+    </g></g>
+
+    <!-- syringe + nurse arm -->
+    <g transform="translate(398 262) rotate(-20)"><g class="syr"><g id="syr1"></g></g></g>
+    <!-- nurse -->
+    <g>
+      <rect x="610" y="150" width="190" height="300" rx="40" fill="#fff" stroke="#b9d3e3" stroke-width="3"/>
+      <rect x="690" y="150" width="30" height="300" fill="#7fd1c7"/>
+      <circle cx="680" cy="100" r="44" fill="#d9a77f"/>
+      <path d="M634 96 Q640 48 682 50 Q726 48 726 96 Q708 70 682 72 Q656 70 634 96Z" fill="#2f2a2a"/>
+      <rect x="650" y="44" width="62" height="18" rx="6" fill="#fff"/>
+      <rect x="675" y="38" width="12" height="30" rx="3" fill="#ff6f91"/><rect x="666" y="47" width="30" height="12" rx="3" fill="#ff6f91"/>
+      <circle cx="664" cy="102" r="5" fill="#2b2b2b"/><circle cx="696" cy="102" r="5" fill="#2b2b2b"/>
+      <path d="M668 118 Q680 130 692 118" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- speech bubbles -->
+    <g class="bub bub-poke"><rect x="120" y="215" width="150" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
+      <text x="195" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Pinch! Quick!</text></g>
+    <g class="bub bub-done"><rect x="40" y="215" width="210" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
+      <text x="145" y="245" text-anchor="middle" font-size="21" font-weight="bold" fill="#2b3a55">That wasn't so bad!</text></g>
+
+    <!-- protected shield -->
+    <g transform="translate(520 220)"><g class="shield">
+      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="#4cc38a" stroke="#2c8f61" stroke-width="5"/>
+      <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    </g></g>
+  </g>
+
+  <!-- ================= SCENE 2: PUPPY ================= -->
+  <g id="s2" class="scene">
+    <rect width="800" height="450" fill="#e6f7e9"/>
+    <rect y="385" width="800" height="65" fill="#f3e2c7"/>
+    <!-- poster: paw -->
+    <rect x="60" y="50" width="130" height="100" rx="10" fill="#fff" stroke="#9fd0ab" stroke-width="4"/>
+    <ellipse cx="125" cy="108" rx="20" ry="16" fill="#ff6f91"/>
+    <circle cx="97" cy="84" r="8" fill="#ff6f91"/><circle cx="115" cy="73" r="8" fill="#ff6f91"/>
+    <circle cx="135" cy="73" r="8" fill="#ff6f91"/><circle cx="153" cy="84" r="8" fill="#ff6f91"/>
+    <!-- exam table -->
+    <rect x="150" y="372" width="340" height="26" rx="10" fill="#b8c7d6"/>
+    <rect x="190" y="398" width="16" height="40" fill="#8aa0b4"/><rect x="434" y="398" width="16" height="40" fill="#8aa0b4"/>
+
+    <!-- puppy -->
+    <g>
+      <path class="tail" d="M246 320 Q205 300 215 250 Q222 232 236 244 Q230 285 262 300Z" fill="#a9702f"/>
+      <g class="breathe">
+        <ellipse cx="318" cy="305" rx="88" ry="72" fill="#d9a066"/>
+        <ellipse cx="318" cy="325" rx="52" ry="48" fill="#f6dfc0"/>
+        <rect x="268" y="330" width="34" height="46" rx="16" fill="#d9a066"/><rect x="334" y="330" width="34" height="46" rx="16" fill="#d9a066"/>
+        <ellipse cx="285" cy="376" rx="22" ry="9" fill="#f6dfc0"/><ellipse cx="351" cy="376" rx="22" ry="9" fill="#f6dfc0"/>
+      </g>
+      <!-- head -->
+      <g transform="rotate(14 266 185)"><ellipse class="ear-l" cx="266" cy="185" rx="26" ry="48" fill="#a9702f"/></g>
+      <g transform="rotate(-14 366 185)"><ellipse class="ear-r" cx="366" cy="185" rx="26" ry="48" fill="#a9702f"/></g>
+      <circle cx="316" cy="190" r="60" fill="#d9a066"/>
+      <circle cx="294" cy="180" r="21" fill="#a9702f" opacity=".5"/>
+      <ellipse cx="316" cy="216" rx="30" ry="22" fill="#f6dfc0"/>
+      <ellipse cx="316" cy="205" rx="10" ry="7" fill="#2b2b2b"/>
+      <g class="eyes-open"><circle cx="294" cy="182" r="8" fill="#2b2b2b"/><circle cx="338" cy="182" r="8" fill="#2b2b2b"/>
+        <circle cx="297" cy="179" r="3" fill="#fff"/><circle cx="341" cy="179" r="3" fill="#fff"/></g>
+      <g class="eyes-squint" fill="none" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round">
+        <path d="M286 176 L300 183 L286 190"/><path d="M346 176 L332 183 L346 190"/></g>
+      <path class="m-idle" d="M304 222 Q316 232 328 222" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+      <path class="m-worry" d="M305 228 Q316 220 327 228" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+      <ellipse class="m-ouch" cx="316" cy="226" rx="7" ry="9" fill="#8a2b3a"/>
+      <g class="m-happy"><path d="M298 220 Q316 246 334 220Z" fill="#8a2b3a"/><path d="M308 232 Q316 252 326 232Z" fill="#ff7a8a"/></g>
+    </g>
+
+    <!-- bandage with paw -->
+    <g transform="translate(394 280) rotate(-10)"><g class="bandage">
+      <rect x="-26" y="-11" width="52" height="22" rx="9" fill="#ffd6e0" stroke="#e58aa0" stroke-width="2"/>
+      <rect x="-10" y="-11" width="20" height="22" fill="#fff"/>
+      <ellipse cx="0" cy="2" rx="4" ry="3.2" fill="#ff6f91"/>
+      <circle cx="-5" cy="-3" r="1.6" fill="#ff6f91"/><circle cx="0" cy="-5" r="1.6" fill="#ff6f91"/><circle cx="5" cy="-3" r="1.6" fill="#ff6f91"/>
+    </g></g>
+
+    <!-- syringe + vet arm -->
+    <g transform="translate(394 280) rotate(-20)"><g class="syr"><g id="syr2"></g></g></g>
+    <!-- vet -->
+    <g>
+      <rect x="610" y="150" width="190" height="300" rx="40" fill="#7fd1c7" stroke="#4fa89d" stroke-width="3"/>
+      <path d="M690 150 L720 150 L705 215Z" fill="#fff"/>
+      <path d="M660 160 Q650 230 690 235 Q725 230 715 160" fill="none" stroke="#3b4a66" stroke-width="5"/>
+      <circle cx="690" cy="238" r="9" fill="#cfd8e3" stroke="#3b4a66" stroke-width="3"/>
+      <circle cx="680" cy="100" r="44" fill="#f2c9a0"/>
+      <path d="M636 92 Q640 52 680 54 Q724 52 724 92 Q706 66 680 68 Q654 66 636 92Z" fill="#8a5a2b"/>
+      <circle cx="664" cy="102" r="5" fill="#2b2b2b"/><circle cx="696" cy="102" r="5" fill="#2b2b2b"/>
+      <path d="M668 118 Q680 130 692 118" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- hearts -->
+    <g class="hearts" fill="#ff6f91">
+      <g transform="translate(240 150)"><path class="heart" d="M0 8 C-14 -6 -6 -18 0 -8 C6 -18 14 -6 0 8Z"/></g>
+      <g transform="translate(395 130)"><path class="heart" d="M0 8 C-14 -6 -6 -18 0 -8 C6 -18 14 -6 0 8Z"/></g>
+      <g transform="translate(320 105)"><path class="heart" d="M0 8 C-14 -6 -6 -18 0 -8 C6 -18 14 -6 0 8Z"/></g>
+    </g>
+
+    <!-- bubbles -->
+    <g class="bub bub-poke"><rect x="60" y="215" width="120" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
+      <text x="120" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Yip! Pinch!</text></g>
+    <g class="bub bub-done"><rect x="20" y="215" width="190" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
+      <text x="115" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Woof! I'm brave!</text></g>
+
+    <g transform="translate(520 240)"><g class="shield">
+      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="#4cc38a" stroke="#2c8f61" stroke-width="5"/>
+      <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    </g></g>
+  </g>
+
+  <!-- ================= SCENE 3: TOGETHER ================= -->
+  <g id="s3" class="scene">
+    <rect width="800" height="450" fill="#fff0c9"/>
+    <g font-size="130" text-anchor="middle">
+      <text class="bounce" x="230" y="270">🧒</text>
+      <text class="bounce" x="570" y="270" style="animation-delay:.3s">🐶</text>
+    </g>
+    <g transform="translate(400 215)">
+      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="#4cc38a" stroke="#2c8f61" stroke-width="5"/>
+      <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="400" y="360" text-anchor="middle" font-size="38" font-weight="bold" fill="#2b3a55">Vaccines keep kids AND puppies healthy!</text>
+    <text x="400" y="405" text-anchor="middle" font-size="26" fill="#2b3a55">❤️ Healthy friends play together ❤️</text>
+  </g>
+</svg>
+<div class="caption" id="caption" aria-live="polite"></div>
+</div>
+
+<button id="replay" type="button">↻ Watch again</button>
+
+<script>
+(function () {
+  // Shared syringe drawing. Local origin = needle tip; +x points back to the helper's hand.
+  var syringe =
+    '<g class="plunger"><rect x="104" y="-3" width="46" height="6" fill="#9aa8b5"/>' +
+    '<rect x="98" y="-9" width="6" height="18" fill="#6f7f8f"/><rect x="148" y="-13" width="6" height="26" rx="2" fill="#6f7f8f"/>' +
+    '<line x1="154" y1="0" x2="420" y2="0" stroke="#fff" stroke-width="30" stroke-linecap="round"/>' +
+    '<circle cx="158" cy="0" r="15" fill="#e0b48c"/></g>' +
+    '<rect x="34" y="-11" width="68" height="22" rx="4" fill="#eaf6ff" stroke="#5b7388" stroke-width="2.5"/>' +
+    '<rect class="liquid" x="38" y="-7" width="60" height="14" fill="#ff6fa5"/>' +
+    '<rect x="94" y="-14" width="5" height="28" rx="2" fill="#5b7388"/>' +
+    '<rect x="26" y="-5" width="9" height="10" fill="#8aa0b4"/>' +
+    '<line x1="0" y1="0" x2="27" y2="0" stroke="#8d99a6" stroke-width="3" stroke-linecap="round"/>';
+  document.getElementById('syr1').innerHTML = syringe;
+  document.getElementById('syr2').innerHTML = syringe;
+
+  var scenes = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+  var cap = document.getElementById('caption');
+  var timers = [];
+
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function say(text) { cap.textContent = text; }
+  function show(i) {
+    scenes.forEach(function (s, k) { s.classList.toggle('active', k === i); });
+  }
+  function reset() {
+    scenes.forEach(function (s) { s.classList.remove('approach', 'poke', 'done', 'shielded'); });
+  }
+  function step(i, cls) { scenes[i].classList.add(cls); }
+
+  function play() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    // snap the syringe back instantly while hidden, then start
+    reset();
+    show(0);
+
+    // --- the child ---
+    say('This is Maya. Today is her vaccine day! 💉');
+    at(3500,  function () { say('The doctor uses a tiny, tiny needle.'); step(0, 'approach'); });
+    at(6500,  function () { say('Pinch! It is over super fast.'); step(0, 'poke'); });
+    at(8200,  function () { say('All done! Maya was so brave. A bandage and a sticker! ⭐'); step(0, 'done'); });
+    at(11500, function () { say('The vaccine teaches her body to fight germs, so she stays healthy. 🛡️'); step(0, 'shielded'); });
+
+    // --- the puppy ---
+    at(15500, function () { show(1); say('Dogs need vaccines too! This is Biscuit the puppy. 🐶'); });
+    at(19000, function () { say('The vet gives Biscuit a tiny pinch, just like Maya got.'); step(1, 'approach'); });
+    at(22000, function () { say('Yip! Quick pinch...'); step(1, 'poke'); });
+    at(23700, function () { say('All done! Good boy, Biscuit! A paw-print bandage! 🐾'); step(1, 'done'); });
+    at(27000, function () { say('Now Biscuit is protected from germs too. 🛡️'); step(1, 'shielded'); });
+
+    // --- together ---
+    at(31000, function () { show(2); say('Just like kids, dogs need vaccines to stay healthy and play with us!'); });
+  }
+
+  document.getElementById('replay').addEventListener('click', play);
+  play();
+})();
+</script>
+</body>
+</html>
