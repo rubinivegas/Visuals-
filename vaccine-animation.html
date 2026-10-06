@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vaccines Help Everyone!</title>
+<style>
+  :root {
+    --ink: #2b3a55;
+    --bg: #fff6e5;
+    --card: #ffffff;
+    --accent: #ff6f91;
+    --accent-dark: #d94a6f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    gap: 12px;
+  }
+  .stage {
+    width: min(100%, 900px);
+    background: var(--card);
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(43, 58, 85, .18);
+    overflow: hidden;
+  }
+  svg { display: block; width: 100%; height: auto; }
+  .caption {
+    min-height: 4.6em;
+    padding: 14px 20px;
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+    text-align: center;
+    background: #eaf6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity .3s;
+  }
+
+  /* ---------- scenes ---------- */
+  .scene { opacity: 0; transition: opacity .7s; pointer-events: none; }
+  .scene.active { opacity: 1; }
+
+  /* faces: states accumulate (idle -> approach -> poke -> done), later rules win */
+  .m-worry, .m-ouch, .m-happy, .eyes-squint, .bub, .shield, .hearts { display: none; }
+  .approach .m-idle { display: none; }
+  .approach .m-worry { display: inline; }
+  .poke .m-worry { display: none; }
+  .poke .m-ouch { display: inline; }
+  .poke .eyes-open { display: none; }
+  .poke .eyes-squint { display: inline; }
+  .poke .bub-poke { display: inline; }
+  .done .m-ouch { display: none; }
+  .done .m-happy { display: inline; }
+  .done .eyes-squint { display: none; }
+  .done .eyes-open { display: inline; }
+  .done .bub-poke { display: none; }
+  .done .bub-done { display: inline; }
+  .done .hearts { display: inline; }
+  .shield { display: inline; opacity: 0; transform: scale(0); transform-box: fill-box; transform-origin: center; transition: transform .6s cubic-bezier(.3, 1.6, .5, 1), opacity .3s; }
+  .shielded .shield { opacity: 1; transform: scale(1); }
+  .shielded .bub-done { display: none; }
+
+  .idle-arm { transform-box: fill-box; transform-origin: 50% 0; animation: sway 3.2s ease-in-out infinite; }
+  @keyframes sway { 50% { transform: rotate(-3deg); } }
+  button {
+    font: inherit;
+    font-size: 1.1rem;
+    padding: 10px 26px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--accent-dark);
+  }
+  button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-dark); }
+  .snap * { transition: none !important; }
+  .plunger { transition: transform 1s ease-in; }
+  .poke .plunger { transform: translateX(-24px); }
+  .liquid { transform-box: fill-box; transform-origin: left center; transition: transform 1s ease-in; }
+  .poke .liquid { transform: scaleX(.6); }
+  .bandage { opacity: 0; transform: scale(.3); transform-box: fill-box; transform-origin: center; transition: opacity .4s, transform .4s cubic-bezier(.3, 1.6, .5, 1); }
+  .done .bandage { opacity: 1; transform: scale(1); }
+
+  /* idle life */
+  .breathe { animation: breathe 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
+  @keyframes breathe { 50% { transform: scaleY(1.02); } }
+  .tail { transform-box: view-box; transform-origin: 250px 320px; animation: wag 1.4s ease-in-out infinite; }
+  .done .tail { animation-duration: .25s; }
+  @keyframes wag { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg); } }
+  .ear-l { transform-box: fill-box; transform-origin: 80% 70%; animation: ear 2s ease-in-out infinite; }
+  .ear-r { transform-box: fill-box; transform-origin: 20% 70%; animation: ear 2s ease-in-out infinite reverse; }
+  @keyframes ear { 50% { transform: rotate(-4deg); } }
+  .heart { animation: floatup 2.2s ease-in infinite; opacity: 0; }
+  g:nth-child(2) > .heart { animation-delay: .7s; }
+  g:nth-child(3) > .heart { animation-delay: 1.4s; }
+  @keyframes floatup { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-70px); opacity: 0; } }
+  text { font-family: "Trebuchet MS", "Comic Sans MS", system-ui, sans-serif; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .breathe, .idle-arm, .tail, .ear-l, .ear-r, .heart { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+<svg id="svg" viewBox="0 0 800 450" role="img" aria-label="Animation of a girl, Maya, and then a puppy, Stella, getting vaccines">
+
+  <!-- shared shading and textures -->
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#1d2b3a" flood-opacity=".22"/>
+    </filter>
+    <linearGradient id="wallBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eaf8fe"/><stop offset="1" stop-color="#c9e6f3"/></linearGradient>
+    <linearGradient id="wallGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0fbf2"/><stop offset="1" stop-color="#d2ecd8"/></linearGradient>
+    <pattern id="wallTex" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="6" r="1.6" fill="#ffffff" opacity=".55"/><circle cx="19" cy="19" r="1.6" fill="#ffffff" opacity=".55"/>
+      <path d="M13 0 V26" stroke="#ffffff" stroke-opacity=".18" stroke-width="2"/>
+    </pattern>
+    <pattern id="planks" width="140" height="22" patternUnits="userSpaceOnUse">
+      <rect width="140" height="22" fill="#efd9b6"/>
+      <path d="M0 21.5 H140 M70 0 V22" stroke="#d2b48a" stroke-width="1.5"/>
+      <path d="M8 7 Q30 4 52 8 T96 7 M84 15 Q104 12 124 16" fill="none" stroke="#dcc29c" stroke-width="1.2"/>
+    </pattern>
+    <linearGradient id="floorShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a5a32" stop-opacity=".25"/><stop offset=".35" stop-color="#7a5a32" stop-opacity="0"/></linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7e3ee"/><stop offset=".5" stop-color="#a9bdcf"/><stop offset="1" stop-color="#8299ae"/></linearGradient>
+    <linearGradient id="metalLeg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6d8399"/><stop offset=".5" stop-color="#a3b6c8"/><stop offset="1" stop-color="#6d8399"/></linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9eff3"/></linearGradient>
+    <linearGradient id="pinkGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9ab4"/><stop offset="1" stop-color="#e8537a"/></linearGradient>
+    <radialGradient id="castShadow"><stop offset="0" stop-color="#3a2a15" stop-opacity=".35"/><stop offset="1" stop-color="#3a2a15" stop-opacity="0"/></radialGradient>
+    <!-- skin and hair -->
+    <radialGradient id="skinChild" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fbdcbc"/><stop offset=".7" stop-color="#f0c59b"/><stop offset="1" stop-color="#dcab7f"/></radialGradient>
+    <radialGradient id="skinNurse" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e9bd96"/><stop offset=".7" stop-color="#d6a37a"/><stop offset="1" stop-color="#bb8a62"/></radialGradient>
+    <radialGradient id="skinVet" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fbdcbc"/><stop offset=".7" stop-color="#f0c59b"/><stop offset="1" stop-color="#d9a97d"/></radialGradient>
+    <linearGradient id="hairChild" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a5a35"/><stop offset="1" stop-color="#4f2f18"/></linearGradient>
+    <linearGradient id="hairNurse" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4242"/><stop offset="1" stop-color="#1c1818"/></linearGradient>
+    <linearGradient id="hairVet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a7743f"/><stop offset="1" stop-color="#6a421e"/></linearGradient>
+    <!-- clothes -->
+    <linearGradient id="topChild" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb3cb"/><stop offset="1" stop-color="#ee7aa0"/></linearGradient>
+    <linearGradient id="skirtChild" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c993e2"/><stop offset="1" stop-color="#8f52b5"/></linearGradient>
+    <linearGradient id="coatNurse" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#f3f7fa"/><stop offset="1" stop-color="#d5e2eb"/></linearGradient>
+    <linearGradient id="coatVet" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9fe2da"/><stop offset=".6" stop-color="#7fd1c7"/><stop offset="1" stop-color="#58afa4"/></linearGradient>
+    <linearGradient id="pantsNurse" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#78d3c8"/><stop offset="1" stop-color="#43a397"/></linearGradient>
+    <linearGradient id="pantsVet" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#53658a"/><stop offset="1" stop-color="#2a3550"/></linearGradient>
+    <linearGradient id="shoe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5a5a"/><stop offset="1" stop-color="#1e1e1e"/></linearGradient>
+    <pattern id="weave" width="6" height="6" patternUnits="userSpaceOnUse">
+      <path d="M0 6 L6 0 M-1 1 L1 -1 M5 7 L7 5" stroke="#ffffff" stroke-opacity=".13" stroke-width="1"/>
+      <path d="M0 0 L6 6" stroke="#000000" stroke-opacity=".04" stroke-width="1"/>
+    </pattern>
+    <!-- props -->
+    <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ee6b2"/><stop offset="1" stop-color="#2b9462"/></linearGradient>
+    <linearGradient id="bandGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe4ec"/><stop offset="1" stop-color="#f5b9ca"/></linearGradient>
+    <!-- fuzzy edges for fur and hair -->
+    <filter id="fuzzy" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="fuzzySoft" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd6f7"/><stop offset="1" stop-color="#e3f4fd"/></linearGradient>
+    <linearGradient id="lightBeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe8" stop-opacity=".55"/><stop offset="1" stop-color="#fffbe8" stop-opacity="0"/></linearGradient>
+  </defs>
+
+  <!-- ================= SCENE 1: CHILD ================= -->
+  <g id="s1" class="scene">
+    <rect width="800" height="450" fill="url(#wallBlue)"/>
+    <rect width="800" height="385" fill="url(#wallTex)"/>
+    <rect y="385" width="800" height="65" fill="url(#planks)"/>
+    <rect y="385" width="800" height="65" fill="url(#floorShade)"/>
+    <rect y="374" width="800" height="12" fill="#ffffff"/><rect y="384" width="800" height="2" fill="#c9b08a" opacity=".6"/>
+    <!-- window and daylight -->
+    <g filter="url(#softShadow)">
+      <rect x="600" y="48" width="150" height="170" rx="6" fill="#ffffff"/>
+      <rect x="610" y="58" width="130" height="150" fill="url(#sky)"/>
+      <ellipse cx="650" cy="110" rx="26" ry="10" fill="#fff" opacity=".85"/><ellipse cx="672" cy="104" rx="18" ry="9" fill="#fff" opacity=".85"/>
+      <path d="M675 58 V208 M610 133 H740" stroke="#ffffff" stroke-width="6"/>
+      <rect x="592" y="214" width="166" height="10" rx="3" fill="#f4f7f9"/>
+    </g>
+    <path d="M610 224 L740 224 L660 450 L430 450Z" fill="url(#lightBeam)"/>
+    <!-- wall poster -->
+    <rect x="60" y="50" width="130" height="100" rx="10" fill="url(#paper)" stroke="#9fc5da" stroke-width="4" filter="url(#softShadow)"/>
+    <rect x="113" y="68" width="24" height="64" rx="5" fill="url(#pinkGloss)"/>
+    <rect x="93" y="88" width="64" height="24" rx="5" fill="url(#pinkGloss)"/>
+    <rect x="116" y="70" width="5" height="22" rx="2.5" fill="#fff" opacity=".4"/>
+    <!-- bench -->
+    <ellipse cx="310" cy="426" rx="150" ry="9" fill="url(#castShadow)"/>
+    <rect x="200" y="384" width="14" height="40" fill="url(#metalLeg)"/><rect x="406" y="384" width="14" height="40" fill="url(#metalLeg)"/>
+    <rect x="180" y="362" width="260" height="22" rx="8" fill="url(#metal)"/>
+    <rect x="186" y="364" width="248" height="3" rx="1.5" fill="#fff" opacity=".55"/>
+
+    <!-- child (scaled so the adult reads bigger) -->
+    <g transform="translate(300 362) scale(.7) translate(-300 -362)">
+    <g class="breathe">
+      <!-- long hair behind her shoulders -->
+      <g transform="translate(300 232) scale(.82) translate(-300 -232)">
+        <path d="M246 176 Q234 250 258 270 Q300 284 342 270 Q366 250 354 176Z" fill="url(#hairChild)" filter="url(#fuzzySoft)"/>
+      </g>
+      <!-- legs and Mary Jane shoes -->
+      <rect x="262" y="350" width="34" height="62" rx="14" fill="url(#skinChild)"/>
+      <rect x="306" y="350" width="34" height="62" rx="14" fill="url(#skinChild)"/>
+      <ellipse cx="274" cy="418" rx="24" ry="11" fill="url(#pinkGloss)"/><ellipse cx="328" cy="418" rx="24" ry="11" fill="url(#pinkGloss)"/>
+      <path d="M262 410 H288 M316 410 H342" stroke="#c43c66" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="268" cy="414" rx="7" ry="2.5" fill="#fff" opacity=".5"/><ellipse cx="322" cy="414" rx="7" ry="2.5" fill="#fff" opacity=".5"/>
+      <!-- top with a heart -->
+      <rect x="248" y="232" width="106" height="130" rx="32" fill="url(#topChild)"/>
+      <rect x="248" y="232" width="106" height="130" rx="32" fill="url(#weave)"/>
+      <path d="M274 236 Q300 254 326 236" fill="none" stroke="#e05f8b" stroke-width="4" stroke-linecap="round"/>
+      <path d="M300 300 C286 288 292 278 300 286 C308 278 314 288 300 300Z" fill="#fff" opacity=".85"/>
+      <!-- pleated skirt -->
+      <path d="M250 326 L350 326 L368 372 L232 372Z" fill="url(#skirtChild)"/>
+      <path d="M266 328 L258 371 M284 328 L281 371 M300 328 L300 371 M316 328 L319 371 M334 328 L342 371" stroke="#7a3f9e" stroke-opacity=".55" stroke-width="2"/>
+      <path d="M250 328 H350" stroke="#e0b8f0" stroke-width="3" stroke-linecap="round"/>
+      <!-- other arm: hangs from the shoulder, elbow bent, hand resting on the lap -->
+      <path d="M250 258 L228 318 L262 350" fill="none" stroke="#e8b98e" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M248 262 L231 316 L258 342" fill="none" stroke="#fbdcbc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
+      <g class="hand-slot" data-x="262" data-y="350" data-a="43" data-m="0"></g>
+      <path d="M257 250 L249 264" stroke="#f590b3" stroke-width="32" stroke-linecap="round"/>
+      <!-- vaccinated arm: same pose, sleeve rolled up to show the upper arm -->
+      <path d="M350 258 L372 318 L338 350" fill="none" stroke="#e8b98e" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M347 262 L366 316 L340 342" fill="none" stroke="#fbdcbc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
+      <g class="hand-slot" data-x="338" data-y="350" data-a="137" data-m="1"></g>
+      <path d="M343 250 L351 262" stroke="#f590b3" stroke-width="32" stroke-linecap="round"/>
+      <path d="M337.9 270.2 L366.1 259.8" stroke="#d9608a" stroke-width="7" stroke-linecap="round"/>
+      <!-- head -->
+      <rect x="290" y="226" width="20" height="14" fill="#e3b287"/>
+      <g transform="translate(300 232) scale(.82) translate(-300 -232)">
+      <!-- ears peek out at the sides; wide forehead, full cheeks, small rounded chin -->
+      <ellipse cx="250" cy="192" rx="7" ry="11" fill="#e8b98e"/><ellipse cx="350" cy="192" rx="7" ry="11" fill="#e8b98e"/>
+      <path d="M300 135 Q350 135 352 182 Q353 206 340 222 Q324 238 300 238 Q276 238 260 222 Q247 206 248 182 Q250 135 300 135Z" fill="url(#skinChild)"/>
+      <path d="M252 196 Q254 214 266 226 Q282 238 300 238 Q276 236 262 220 Q250 206 252 196Z" fill="#000" opacity=".06"/>
+      <path d="M348 196 Q346 214 334 226 Q318 238 300 238 Q324 236 338 220 Q350 206 348 196Z" fill="#000" opacity=".06"/>
+
+      <!-- bangs and side locks -->
+      <g filter="url(#fuzzySoft)">
+        <path d="M250 184 Q246 128 300 129 Q354 128 350 184 Q344 160 332 154 Q326 170 306 164 Q296 172 282 160 Q264 162 250 184Z" fill="url(#hairChild)"/>
+        <path d="M250 176 Q242 222 252 256 Q262 244 264 206Z" fill="url(#hairChild)"/>
+        <path d="M350 176 Q358 222 348 256 Q338 244 336 206Z" fill="url(#hairChild)"/>
+      </g>
+      <path d="M270 140 Q284 134 296 138 M312 137 Q326 136 336 144 M256 200 Q254 226 256 244 M344 200 Q346 226 344 244 M262 150 Q272 142 282 146" fill="none" stroke="#b07a4c" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>
+      <!-- bow -->
+      <g transform="translate(336 142) rotate(18)">
+        <path d="M0 0 L-18 -11 L-18 11Z" fill="url(#pinkGloss)"/><path d="M0 0 L18 -11 L18 11Z" fill="url(#pinkGloss)"/>
+        <circle r="5" fill="#e8537a"/><path d="M-14 -6 L-6 -2" stroke="#fff" stroke-width="2" opacity=".6" stroke-linecap="round"/>
+      </g>
+      <!-- brows, nose, cheeks -->
+      <path d="M275 172 Q284 167 293 171 M307 171 Q316 167 325 172" fill="none" stroke="#6b4429" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M301 190 Q299 198 296 202 Q300 205 305 202" fill="none" stroke="#cf9468" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="274" cy="204" rx="8" ry="5" fill="#ff9aa8" opacity=".45"/><ellipse cx="326" cy="204" rx="8" ry="5" fill="#ff9aa8" opacity=".45"/>
+      <!-- eyes: whites, brown irises, lids and lashes -->
+      <g class="eyes-open">
+        <path d="M275 186 Q284 178 293 186 Q284 192 275 186Z" fill="#fff" stroke="#8a6a55" stroke-width=".8"/>
+        <path d="M307 186 Q316 178 325 186 Q316 192 307 186Z" fill="#fff" stroke="#8a6a55" stroke-width=".8"/>
+        <circle cx="284" cy="185.5" r="4.4" fill="#7a5130"/><circle cx="316" cy="185.5" r="4.4" fill="#7a5130"/>
+        <circle cx="284" cy="185.5" r="2.1" fill="#1a110b"/><circle cx="316" cy="185.5" r="2.1" fill="#1a110b"/>
+        <circle cx="285.5" cy="184" r="1.2" fill="#fff"/><circle cx="317.5" cy="184" r="1.2" fill="#fff"/>
+        <path d="M274 185 Q284 176 294 184 M306 184 Q316 176 326 185" fill="none" stroke="#2b1d14" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M275 184 L271 181 M277 181 L274 177 M325 184 L329 181 M323 181 L326 177" stroke="#2b1d14" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <g class="eyes-squint" fill="none" stroke="#2b1d14" stroke-width="2.6" stroke-linecap="round">
+        <path d="M276 182 L290 187 L276 192"/><path d="M324 182 L310 187 L324 192"/></g>
+      <!-- lips -->
+      <path class="m-idle" d="M290 211 Q300 218 310 211" fill="none" stroke="#c4606e" stroke-width="3" stroke-linecap="round"/>
+      <path class="m-worry" d="M291 214 Q300 208 309 214" fill="none" stroke="#c4606e" stroke-width="3" stroke-linecap="round"/>
+      <ellipse class="m-ouch" cx="300" cy="213" rx="6" ry="8" fill="#7a2733" stroke="#c4606e" stroke-width="2"/>
+      <g class="m-happy"><path d="M286 207 Q300 226 314 207Z" fill="#7a2733" stroke="#c4606e" stroke-width="2" stroke-linejoin="round"/><path d="M288 208 H312 L310 212 H290Z" fill="#fff"/><path d="M292 216 Q300 222 308 216 Q300 214 292 216Z" fill="#ff8a96"/></g>
+      </g>
+    </g>
+
+    <!-- bandage on arm -->
+    <g transform="translate(368 287) rotate(70)"><g class="bandage">
+      <rect x="-24" y="-10" width="48" height="20" rx="8" fill="url(#bandGrad)" stroke="#e58aa0" stroke-width="2"/>
+      <rect x="-9" y="-10" width="18" height="20" fill="#fff"/>
+      <path d="M0 -5 l2 4 4 .5 -3 3 .8 4.5 -3.8 -2.2 -3.8 2.2 .8 -4.5 -3 -3 4 -.5z" fill="#ffc400"/>
+    </g></g>
+    </g>
+
+    <!-- nurse (built by script) -->
+    <g class="helper" data-kind="nurse"></g>
+
+    <!-- speech bubbles -->
+    <g class="bub bub-poke"><rect x="95" y="215" width="150" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3" filter="url(#softShadow)"/>
+      <text x="170" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Pinch! Quick!</text></g>
+    <g class="bub bub-done"><rect x="40" y="215" width="210" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3" filter="url(#softShadow)"/>
+      <text x="145" y="245" text-anchor="middle" font-size="21" font-weight="bold" fill="#2b3a55">That wasn't so bad!</text></g>
+
+    <!-- protected shield -->
+    <g transform="translate(140 265)"><g class="shield">
+      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="url(#shieldGrad)" stroke="#2c8f61" stroke-width="5" filter="url(#softShadow)"/>
+      <path d="M-40 -36 L0 -52 L0 40 Q-36 12 -40 -36Z" fill="#fff" opacity=".18"/>
+      <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    </g></g>
+  </g>
+
+  <!-- ================= SCENE 2: PUPPY ================= -->
+  <g id="s2" class="scene">
+    <rect width="800" height="450" fill="url(#wallGreen)"/>
+    <rect width="800" height="385" fill="url(#wallTex)"/>
+    <rect y="385" width="800" height="65" fill="url(#planks)"/>
+    <rect y="385" width="800" height="65" fill="url(#floorShade)"/>
+    <rect y="374" width="800" height="12" fill="#ffffff"/><rect y="384" width="800" height="2" fill="#c9b08a" opacity=".6"/>
+    <!-- window and daylight -->
+    <g filter="url(#softShadow)">
+      <rect x="600" y="48" width="150" height="170" rx="6" fill="#ffffff"/>
+      <rect x="610" y="58" width="130" height="150" fill="url(#sky)"/>
+      <ellipse cx="650" cy="110" rx="26" ry="10" fill="#fff" opacity=".85"/><ellipse cx="672" cy="104" rx="18" ry="9" fill="#fff" opacity=".85"/>
+      <path d="M675 58 V208 M610 133 H740" stroke="#ffffff" stroke-width="6"/>
+      <rect x="592" y="214" width="166" height="10" rx="3" fill="#f4f7f9"/>
+    </g>
+    <path d="M610 224 L740 224 L660 450 L430 450Z" fill="url(#lightBeam)"/>
+    <!-- poster: paw -->
+    <rect x="60" y="50" width="130" height="100" rx="10" fill="url(#paper)" stroke="#9fd0ab" stroke-width="4" filter="url(#softShadow)"/>
+    <ellipse cx="125" cy="108" rx="20" ry="16" fill="url(#pinkGloss)"/>
+    <circle cx="97" cy="84" r="8" fill="url(#pinkGloss)"/><circle cx="115" cy="73" r="8" fill="url(#pinkGloss)"/>
+    <circle cx="135" cy="73" r="8" fill="url(#pinkGloss)"/><circle cx="153" cy="84" r="8" fill="url(#pinkGloss)"/>
+    <!-- exam table -->
+    <ellipse cx="295" cy="440" rx="160" ry="9" fill="url(#castShadow)"/>
+    <rect x="190" y="398" width="16" height="40" fill="url(#metalLeg)"/><rect x="400" y="398" width="16" height="40" fill="url(#metalLeg)"/>
+    <rect x="150" y="372" width="290" height="26" rx="10" fill="url(#metal)"/>
+    <rect x="156" y="374" width="278" height="3" rx="1.5" fill="#fff" opacity=".55"/>
+
+    <!-- puppy (scaled to sit naturally beside an adult) -->
+    <g transform="translate(318 372) scale(.7) translate(-318 -372)">
+    <!-- Stella: black tricolor Australian Shepherd puppy (black coat, tan brows, cheeks,
+         legs and inner ears, white chest bib and paws, brown eyes, folded ears, long tail, blue collar) -->
+    <defs>
+      <radialGradient id="stBlack" cx="38%" cy="28%" r="80%">
+        <stop offset="0" stop-color="#454b54"/><stop offset=".55" stop-color="#23262b"/><stop offset="1" stop-color="#121417"/>
+      </radialGradient>
+      <radialGradient id="stTan" cx="40%" cy="30%" r="80%">
+        <stop offset="0" stop-color="#e3a15c"/><stop offset=".6" stop-color="#c9823f"/><stop offset="1" stop-color="#9c5e27"/>
+      </radialGradient>
+      <linearGradient id="stWhite" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ddd5c7"/>
+      </linearGradient>
+      <linearGradient id="stFlap" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3d424a"/><stop offset="1" stop-color="#15171a"/>
+      </linearGradient>
+      <!-- fur strands: short curved strokes tiled over the coat -->
+      <pattern id="stFur" width="29" height="23" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
+        <path d="M3 21 Q5 13 3 6 M11 14 Q13 9 12 3 M18 22 Q20 15 18 10 M24 12 Q26 7 24 1 M7 9 Q8 5 7 2" fill="none" stroke="#ffffff" stroke-opacity=".07" stroke-width="1.2" stroke-linecap="round"/>
+      </pattern>
+      <pattern id="stFurDark" width="16" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-6)">
+        <path d="M2 13 Q4 7 3 1 M9 13 Q10 8 9 2" fill="none" stroke="#5a3412" stroke-opacity=".18" stroke-width="1.2" stroke-linecap="round"/>
+      </pattern>
+    </defs>
+    <!-- soft shadow on the table -->
+    <ellipse cx="318" cy="378" rx="92" ry="10" fill="#000" opacity=".14"/>
+    <g>
+      <path class="tail" d="M250 330 Q206 346 186 322 Q176 304 192 296 Q204 318 252 312Z" fill="url(#stBlack)" filter="url(#fuzzy)"/>
+      <g class="breathe">
+        <ellipse cx="318" cy="305" rx="88" ry="72" fill="url(#stBlack)" filter="url(#fuzzy)"/>
+        <ellipse cx="318" cy="305" rx="88" ry="72" fill="url(#stFur)"/>
+        <!-- tan along the sides of the chest, fluffy white bib down the middle -->
+        <path d="M268 262 Q318 248 368 262 Q376 300 360 332 Q318 350 276 332 Q260 300 268 262Z" fill="url(#stTan)"/>
+        <path d="M268 262 Q318 248 368 262 Q376 300 360 332 Q318 350 276 332 Q260 300 268 262Z" fill="url(#stFurDark)"/>
+        <path d="M284 256 Q318 248 352 256 Q358 292 346 318 Q344 332 336 330 Q334 344 326 340 Q322 354 316 346 Q310 354 306 340 Q298 344 298 330 Q290 332 290 318 Q278 292 284 256Z" fill="url(#stWhite)"/>
+        <path d="M300 280 Q304 290 302 300 M318 284 Q321 296 318 308 M336 280 Q332 290 334 300" fill="none" stroke="#cfc6b6" stroke-width="1.6" stroke-linecap="round"/>
+        <!-- front legs: black at the top, tan below, white paws with toe lines -->
+        <rect x="268" y="326" width="34" height="50" rx="16" fill="url(#stBlack)"/><rect x="334" y="326" width="34" height="50" rx="16" fill="url(#stBlack)"/>
+        <rect x="270" y="340" width="30" height="34" rx="12" fill="url(#stTan)"/><rect x="336" y="340" width="30" height="34" rx="12" fill="url(#stTan)"/>
+        <ellipse cx="285" cy="374" rx="20" ry="10" fill="url(#stWhite)"/><ellipse cx="351" cy="374" rx="20" ry="10" fill="url(#stWhite)"/>
+        <path d="M279 372 L279 380 M291 372 L291 380 M345 372 L345 380 M357 372 L357 380" stroke="#cfc6b6" stroke-width="1.6" stroke-linecap="round"/>
+      </g>
+      <!-- head with fluffy cheek tufts -->
+      <path d="M262 196 L250 206 L262 210 L252 222 L266 222 M370 196 L382 206 L370 210 L380 222 L366 222" fill="#23262b" stroke="#23262b" stroke-width="6" stroke-linejoin="round" filter="url(#fuzzy)"/>
+      <circle cx="316" cy="190" r="60" fill="url(#stBlack)" filter="url(#fuzzy)"/>
+      <circle cx="316" cy="190" r="60" fill="url(#stFur)"/>
+      <!-- folded ears: short upright base, then the flap tips over and hangs beside the face -->
+      <g class="ear-l" filter="url(#fuzzySoft)">
+        <path d="M264 162 L300 140 L286 110 L254 120Z" fill="#23262b"/>
+        <path d="M268 152 L292 140 L282 120 L262 128Z" fill="url(#stTan)"/>
+        <path d="M254 120 Q270 104 286 110 Q284 148 252 188 Q236 180 236 154 Q238 132 254 120Z" fill="url(#stFlap)"/>
+        <path d="M256 121 Q270 108 284 112" fill="none" stroke="#5b616b" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <g class="ear-r" filter="url(#fuzzySoft)">
+        <path d="M368 162 L332 140 L346 110 L378 120Z" fill="#23262b"/>
+        <path d="M364 152 L340 140 L350 120 L370 128Z" fill="url(#stTan)"/>
+        <path d="M378 120 Q362 104 346 110 Q348 148 380 188 Q396 180 396 154 Q394 132 378 120Z" fill="url(#stFlap)"/>
+        <path d="M376 121 Q362 108 348 112" fill="none" stroke="#5b616b" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <ellipse cx="292" cy="166" rx="8" ry="5" fill="url(#stTan)"/><ellipse cx="340" cy="166" rx="8" ry="5" fill="url(#stTan)"/>
+      <path d="M262 198 Q270 236 302 240 L304 214 Q284 214 270 196Z" fill="url(#stTan)"/>
+      <path d="M370 198 Q362 236 330 240 L328 214 Q348 214 362 196Z" fill="url(#stTan)"/>
+      <ellipse cx="316" cy="219" rx="25" ry="19" fill="url(#stTan)"/>
+      <ellipse cx="316" cy="211" rx="15" ry="11" fill="#33373d"/>
+      <ellipse cx="316" cy="232" rx="13" ry="7" fill="#d9d2c6"/>
+      <path d="M305 201 Q316 195 327 201 Q327 209 316 213 Q305 209 305 201Z" fill="#0f1012"/>
+      <ellipse cx="311" cy="206" rx="2.6" ry="1.6" fill="#000"/><ellipse cx="321" cy="206" rx="2.6" ry="1.6" fill="#000"/>
+      <path d="M316 209 V214" stroke="#000" stroke-width="1.4"/>
+      <ellipse cx="312" cy="202" rx="3.5" ry="2" fill="#fff" opacity=".45"/>
+      <!-- blue collar -->
+      <path d="M262 236 Q316 268 370 236" fill="none" stroke="#5aa0e6" stroke-width="13" stroke-linecap="round"/>
+      <path d="M266 233 Q316 262 366 233" fill="none" stroke="#8cc2f2" stroke-width="3" stroke-linecap="round"/>
+      <rect x="336" y="244" width="18" height="12" rx="3" fill="#3f86d1"/>
+      <!-- brown eyes -->
+      <g class="eyes-open"><circle cx="294" cy="183" r="8" fill="#7a4520"/><circle cx="338" cy="183" r="8" fill="#7a4520"/>
+        <circle cx="294" cy="183" r="4" fill="#120c08"/><circle cx="338" cy="183" r="4" fill="#120c08"/>
+        <circle cx="297" cy="180" r="2.5" fill="#fff"/><circle cx="341" cy="180" r="2.5" fill="#fff"/></g>
+      <g class="eyes-squint" fill="none" stroke="#c9823f" stroke-width="4" stroke-linecap="round">
+        <path d="M286 177 L300 184 L286 191"/><path d="M346 177 L332 184 L346 191"/></g>
+      <path class="m-idle" d="M304 224 Q316 233 328 224" fill="none" stroke="#120c08" stroke-width="3.5" stroke-linecap="round"/>
+      <path class="m-worry" d="M305 229 Q316 221 327 229" fill="none" stroke="#120c08" stroke-width="3.5" stroke-linecap="round"/>
+      <ellipse class="m-ouch" cx="316" cy="227" rx="7" ry="9" fill="#8a2b3a"/>
+      <g class="m-happy"><path d="M298 221 Q316 247 334 221Z" fill="#8a2b3a"/><path d="M308 233 Q316 253 326 233Z" fill="#ff7a8a"/></g>
+    </g>
+
+    <!-- bandage with paw -->
+    <g transform="translate(380 256) rotate(-30)"><g class="bandage">
+      <rect x="-26" y="-11" width="52" height="22" rx="9" fill="url(#bandGrad)" stroke="#e58aa0" stroke-width="2"/>
+      <rect x="-10" y="-11" width="20" height="22" fill="#fff"/>
+      <ellipse cx="0" cy="2" rx="4" ry="3.2" fill="#ff6f91"/>
+      <circle cx="-5" cy="-3" r="1.6" fill="#ff6f91"/><circle cx="0" cy="-5" r="1.6" fill="#ff6f91"/><circle cx="5" cy="-3" r="1.6" fill="#ff6f91"/>
+    </g></g>
+
+    <!-- hearts -->
+    <g class="hearts" fill="#ff6f91">
+      <g transform="translate(240 150)"><path class="heart" d="M0 8 C-14 -6 -6 -18 0 -8 C6 -18 14 -6 0 8Z"/></g>
+      <g transform="translate(395 130)"><path class="heart" d="M0 8 C-14 -6 -6 -18 0 -8 C6 -18 14 -6 0 8Z"/></g>
+      <g transform="translate(320 105)"><path class="heart" d="M0 8 C-14 -6 -6 -18 0 -8 C6 -18 14 -6 0 8Z"/></g>
+    </g>
+    </g>
+
+    <!-- vet (built by script) -->
+    <g class="helper" data-kind="vet"></g>
+
+    <!-- bubbles -->
+    <g class="bub bub-poke"><rect x="45" y="215" width="150" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3" filter="url(#softShadow)"/>
+      <text x="120" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Yip! Pinch!</text></g>
+    <g class="bub bub-done"><rect x="20" y="215" width="190" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3" filter="url(#softShadow)"/>
+      <text x="115" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Woof! I'm brave!</text></g>
+
+    <g transform="translate(140 265)"><g class="shield">
+      <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="url(#shieldGrad)" stroke="#2c8f61" stroke-width="5" filter="url(#softShadow)"/>
+      <path d="M-40 -36 L0 -52 L0 40 Q-36 12 -40 -36Z" fill="#fff" opacity=".18"/>
+      <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    </g></g>
+  </g>
+
+</svg>
+<div class="caption" id="caption" aria-live="polite"></div>
+</div>
+
+<button id="replay" type="button">↻ Watch again</button>
+
+<script>
+(function () {
+  // A relaxed hanging hand seen from the side: palm toward the thigh, fingers together and
+  // gently curled forward, thumb lying along the index finger. Drawn pointing down (+y) with
+  // the front of the hand toward -x.
+  function handRestSVG(x, y, angle, scale, skin, line) {
+    return '<g transform="translate(' + x + ' ' + y + ') rotate(' + angle + ') scale(' + scale + ')">' +
+      '<path d="M-4.5 -2 L-4.5 0 C-6 8 -7 14 -6 19 C-5.5 24 -4 28 -1 30 C2 31 4 29 4.5 26 C6 20 6.5 12 5.5 6 C5 3 4.8 1 4.5 0 L4.5 -2Z" fill="' + skin + '"/>' +
+      '<path d="M-4.5 0 C-6 8 -7 14 -6 19 C-5.5 24 -4 28 -1 30 C2 31 4 29 4.5 26 C6 20 6.5 12 5.5 6 C5 3 4.8 1 4.5 0" fill="none" stroke="' + line + '" stroke-width=".8"/>' +
+      '<path d="M-1.6 19 Q-.6 24 .4 28.6 M1.4 18 Q2.4 23 3.1 27" fill="none" stroke="' + line + '" stroke-width=".7" opacity=".6"/>' +
+      '<path d="M-5 5 C-9 9 -9.5 14.5 -7.6 18.5 C-6.6 20 -5 19 -5.2 17Z" fill="' + skin + '" stroke="' + line + '" stroke-width=".8"/>' +
+      '<path d="M3.5 4 Q5 12 4.6 20" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.4" stroke-linecap="round"/>' +
+      '</g>';
+  }
+
+  // The back of a hand resting palm-down, pointing along +x with the thumb on the -y side
+  // (mirror puts the thumb on the other side): fingers together with soft separations and nails.
+  function handBackSVG(x, y, angle, scale, mirror, skin, line) {
+    var t = 'translate(' + x + ' ' + y + ') rotate(' + angle + ') scale(' + scale + ' ' + (mirror ? -scale : scale) + ')';
+    return '<g transform="' + t + '">' +
+      '<path d="M-2 -5.5 Q5 -9.5 10 -8.2 Q11 -7 9 -6.4 Q4 -6.6 -1 -4Z" fill="' + skin + '" stroke="' + line + '" stroke-width=".7"/>' +
+      '<path d="M-6 -5.6 L7 -6 L18 -5.8 Q20.6 -4.2 18 -2.8 Q21.6 -1.4 19 0 Q20.6 1.5 18 2.8 Q17.6 4.4 15.5 5.6 L7 6 L-6 5.4Z" fill="' + skin + '"/>' +
+      '<path d="M-3 -5.7 L7 -6 L18 -5.8 Q20.6 -4.2 18 -2.8 Q21.6 -1.4 19 0 Q20.6 1.5 18 2.8 Q17.6 4.4 15.5 5.6 L7 6 L-3 5.5" fill="none" stroke="' + line + '" stroke-width=".7"/>' +
+      '<path d="M9 -2.8 L18 -2.8 M9 0 L19 0 M9 2.8 L18 2.8" stroke="' + line + '" stroke-width=".6" opacity=".6"/>' +
+      '<path d="M5 -4 Q6 0 5 4" fill="none" stroke="' + line + '" stroke-width=".5" opacity=".45"/>' +
+      '<ellipse cx="17.4" cy="-4.2" rx="1.3" ry=".9" fill="#fff" opacity=".5"/><ellipse cx="18.6" cy="-1.4" rx="1.3" ry=".9" fill="#fff" opacity=".5"/>' +
+      '<ellipse cx="18" cy="1.4" rx="1.3" ry=".9" fill="#fff" opacity=".5"/><ellipse cx="15.6" cy="4.2" rx="1.2" ry=".8" fill="#fff" opacity=".5"/>' +
+      '</g>';
+  }
+
+  // Syringe held in a dart grip, the way it is held for an injection: the back of the hand sits
+  // above the barrel, the index finger lies along the top of the barrel (three jointed segments),
+  // the thumb presses along the near side, and the middle, ring and little fingers curl under it.
+  // Local origin = needle tip; +x points back to the hand. `.hand` marks the wrist for the arm.
+  function syringeSVG(skin, line) {
+    // a finger as jointed segments: outline, skin, then a crease at each inner joint
+    var finger = function (pts, w, nail) {
+      var d = 'M' + pts.map(function (p) { return p.join(' '); }).join(' L');
+      var out = '<path d="' + d + '" fill="none" stroke="' + line + '" stroke-width="' + (w + 2) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+                '<path d="' + d + '" fill="none" stroke="' + skin + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>';
+      for (var k = 1; k < pts.length - 1; k++) {
+        out += '<circle cx="' + pts[k][0] + '" cy="' + pts[k][1] + '" r="' + (w * .18) + '" fill="' + line + '" opacity=".45"/>';
+      }
+      if (nail) {
+        var a = pts[pts.length - 2], b = pts[pts.length - 1];
+        var nx = b[0] + (a[0] - b[0]) * .25, ny = b[1] + (a[1] - b[1]) * .25;
+        out += '<ellipse cx="' + nx + '" cy="' + (ny - w * .18) + '" rx="' + (w * .32) + '" ry="' + (w * .2) + '" fill="#fff" opacity=".55"/>';
+      }
+      return out;
+    };
+    return '<g class="plunger"><rect x="104" y="-3" width="46" height="6" fill="#9aa8b5"/>' +
+    '<rect x="98" y="-9" width="6" height="18" fill="#6f7f8f"/><rect x="148" y="-13" width="6" height="26" rx="2" fill="#6f7f8f"/></g>' +
+    // middle, ring and little fingers curl under the barrel (drawn first so the barrel hides their far side)
+    finger([[112, -14], [102, -2], [104, 12]], 7) +
+    finger([[118, -12], [111, -1], [114, 9]], 6.6) +
+    finger([[124, -11], [119, -2], [122, 6]], 6) +
+    '<rect x="34" y="-11" width="68" height="22" rx="4" fill="#eaf6ff" stroke="#5b7388" stroke-width="2.5"/>' +
+    '<rect class="liquid" x="38" y="-7" width="60" height="14" fill="#ff6fa5"/>' +
+    '<rect x="38" y="-9" width="56" height="3" rx="1.5" fill="#fff" opacity=".7"/>' +
+    '<rect x="94" y="-14" width="5" height="28" rx="2" fill="#5b7388"/>' +
+    '<rect x="26" y="-5" width="9" height="10" fill="#8aa0b4"/>' +
+    '<line x1="0" y1="0" x2="27" y2="0" stroke="#8d99a6" stroke-width="3" stroke-linecap="round"/>' +
+    // back of the hand, open on the wrist side so it flows into the wrist
+    '<path d="M152 -31 Q132 -37 113 -30 Q104 -26 106 -18 Q108 -10 120 -8 L152 -12Z" fill="' + skin + '"/>' +
+    '<path d="M152 -31 Q132 -37 113 -30 Q104 -26 106 -18 Q108 -10 120 -8 L152 -12" fill="none" stroke="' + line + '" stroke-width="1.4" stroke-linejoin="round"/>' +
+    '<path d="M116 -29 Q113 -22 116 -14" fill="none" stroke="' + line + '" stroke-width="1" opacity=".5"/>' +
+    // index finger along the top of the barrel, fingertip resting on it
+    finger([[112, -24], [96, -19], [84, -15], [75, -13]], 7, true) +
+    // thumb along the near side of the barrel
+    finger([[142, -14], [120, -5], [104, 1]], 8.5, true) +
+    '<circle class="hand" cx="150" cy="-21" r=".1" fill="none"/>';
+  }
+
+  // Adult helper figure, built around x = 0 and placed at HELPER_X.
+  var HELPER_X = 470;
+  var LOOKS = {
+    nurse: { coat: '#ffffff', line: '#b9d3e3', shirt: '#7fd1c7', pants: '#5bbfb3', skin: '#d9a77f', hair: '#2f2a2a', skinLine: '#a87652',
+             coatFill: 'url(#coatNurse)', pantsFill: 'url(#pantsNurse)', skinFill: 'url(#skinNurse)', hairFill: 'url(#hairNurse)', sheen: '#ffffff', fold: '#c7d8e4' },
+    vet:   { coat: '#7fd1c7', line: '#4fa89d', shirt: '#ffffff', pants: '#3b4a66', skin: '#f2c9a0', hair: '#8a5a2b', skinLine: '#c99a70',
+             coatFill: 'url(#coatVet)', pantsFill: 'url(#pantsVet)', skinFill: 'url(#skinVet)', hairFill: 'url(#hairVet)', sheen: '#c4f0ea', fold: '#5fb4a9' }
+  };
+  function helperSVG(kind) {
+    var c = LOOKS[kind];
+    var limb = function (d, w) {
+      return '<path class="sleeve" d="' + d + '" fill="none" stroke="' + c.line + '" stroke-width="' + (w + 6) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+             '<path class="sleeve" d="' + d + '" fill="none" stroke="' + c.coat + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+             '<path class="sleeve" d="' + d + '" fill="none" stroke="' + c.sheen + '" stroke-opacity=".6" stroke-width="' + (w / 3) + '" stroke-linecap="round" stroke-linejoin="round" transform="translate(-3 -1)"/>';
+    };
+    // skin-coloured wrist running from inside the cuff into the back of the hand
+    var wrist = function (d) {
+      return '<path class="wrist" d="' + d + '" fill="none" stroke="' + c.skinLine + '" stroke-width="12.5" stroke-linecap="round"/>' +
+             '<path class="wrist" d="' + d + '" fill="none" stroke="' + c.skin + '" stroke-width="11" stroke-linecap="round"/>';
+    };
+    // 3/4 view facing left (toward the patient). Face, collar and coat opening sit toward the left;
+    // only the far-side ear shows. The leading (far) arm does the work; the near arm hangs relaxed.
+    var cap = kind === 'nurse'
+      ? '<path d="M-36 50 Q-34 34 -6 33 Q20 34 24 50Z" fill="#fff" stroke="' + c.line + '" stroke-width="2"/>' +
+        '<rect x="-17" y="36" width="7" height="11" fill="#ff6f91"/><rect x="-21" y="39" width="15" height="5" fill="#ff6f91"/>'
+      : '';
+    var steth = kind === 'vet'
+      ? '<path d="M-24 131 Q-30 194 -12 200 Q6 194 2 131" fill="none" stroke="#3b4a66" stroke-width="4"/>' +
+        '<circle cx="-12" cy="203" r="7" fill="#cfd8e3" stroke="#3b4a66" stroke-width="3"/>'
+      : '';
+    // near arm: same bone lengths as the working arm (upper 62, forearm 58), elbow slightly back
+    var nearArm = 'M30 150 L36 211.7 L32.6 252';   // forearm stops at the cuff, 0.7 of the way to the wrist
+    return (
+      // working arm (bent by script) sits behind the torso, like a far arm should
+      '<g class="arm">' + wrist('') + limb('', 18) + '</g>' +
+      '<g transform="translate(' + HELPER_X + ' 0)">' +
+      // legs: far leg a touch darker and set back; shoes point toward the patient
+      '<ellipse cx="-6" cy="425" rx="48" ry="7" fill="url(#castShadow)"/>' +
+      '<rect x="-24" y="300" width="20" height="116" rx="9" fill="' + c.pantsFill + '" style="filter: brightness(.85)"/>' +
+      '<ellipse cx="-24" cy="419" rx="18" ry="8" fill="url(#shoe)"/>' +
+      '<rect x="-2" y="300" width="21" height="118" rx="9" fill="' + c.pantsFill + '"/>' +
+      '<path d="M8 304 V412" stroke="#000" stroke-opacity=".12" stroke-width="2"/>' +
+      '<ellipse cx="0" cy="421" rx="19" ry="8" fill="url(#shoe)"/><ellipse cx="-6" cy="417" rx="7" ry="2" fill="#fff" opacity=".35"/>' +
+      // neck and coat
+      '<rect x="-14" y="106" width="18" height="28" fill="' + c.skinFill + '"/><rect x="-14" y="106" width="18" height="10" fill="#000" opacity=".12"/>' +
+      '<path d="M-34 146 Q-32 131 -18 129 L22 129 Q40 131 42 146 L48 332 L-44 332Z" fill="' + c.coatFill + '" stroke="' + c.line + '" stroke-width="3"/>' +
+      '<path d="M-34 146 Q-32 131 -18 129 L22 129 Q40 131 42 146 L48 332 L-44 332Z" fill="url(#weave)"/>' +
+      '<path d="M-30 200 Q-28 260 -38 320 M30 210 Q34 270 40 324 M-2 236 Q2 280 0 326" fill="none" stroke="' + c.fold + '" stroke-width="2" stroke-linecap="round" opacity=".8"/>' +
+      '<path d="M-24 129 L-12 164 L2 129Z" fill="' + c.shirt + '"/>' +
+      '<path d="M-24 129 L-16 188 M2 129 L-8 188 M-12 164 L-12 332" fill="none" stroke="' + c.line + '" stroke-width="3"/>' +
+      '<rect x="8" y="245" width="22" height="18" rx="3" fill="none" stroke="' + c.line + '" stroke-width="3"/>' + steth +
+      '<g class="idle-arm">' + wrist('M32.6 250 L31.2 267') + handRestSVG(31, 266, 5, 1.25, c.skin, c.skinLine) + limb(nearArm, 18) + '</g>' +
+      // head turned toward the patient, scaled to adult proportions (about 6.5 heads tall)
+      '<g transform="translate(-5 116) scale(.8) translate(5 -116)">' +
+      // skull, forehead, brow, cheekbone, then the jaw tapering to the chin
+      // (the nose is part of the outline, so it shares the face's shading)
+      '<path d="M0 42 Q34 42 36 72 Q37 92 22 104 Q8 114 -14 117 Q-26 117 -30 110 Q-34 105 -33 101 Q-32 98.5 -31 98 Q-38 98 -39.5 94.5 Q-39 89 -35 79 Q-34 74 -35 70 Q-36 66 -35 62 Q-28 42 0 42Z" fill="' + c.skinFill + '"/>' +
+      // shading: far side of the face, under the cheekbone, under the jaw
+      '<path d="M18 58 Q36 70 35 88 Q32 100 22 104 Q8 113 -6 116 Q14 100 18 58Z" fill="#000" opacity=".09"/>' +
+      '<g filter="url(#fuzzySoft)">' +
+      '<path d="M-38 70 Q-36 40 -4 41 Q34 40 34 80 Q34 96 26 104 Q28 80 18 66 Q-8 58 -38 70Z" fill="' + c.hairFill + '"/>' +
+      (kind === 'nurse' ? '<circle cx="26" cy="60" r="13" fill="' + c.hairFill + '"/>' : '') +
+      '</g>' +
+      '<path d="M-26 52 Q-8 46 12 52 M-30 60 Q-14 54 4 58 M20 60 Q28 72 28 88" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2" stroke-linecap="round"/>' + cap +
+      // ear with inner fold
+      '<ellipse cx="24" cy="86" rx="6" ry="9" fill="' + c.skinFill + '"/>' +
+      '<path d="M22 81 Q27 86 22 92" fill="none" stroke="#000" stroke-opacity=".18" stroke-width="1.6" stroke-linecap="round"/>' +
+      // brows
+      '<path d="M-33 73 Q-27 70 -21 72 M-13 72 Q-6 68 2 72" fill="none" stroke="' + c.hair + '" stroke-width="2.6" stroke-linecap="round"/>' +
+      // eyes: far eye narrower; irises look toward the patient
+      '<path d="M-31 81 Q-26 77 -21 81 Q-26 84 -31 81Z" fill="#fff"/>' +
+      '<path d="M-13 81 Q-6 75 1 81 Q-6 85 -13 81Z" fill="#fff"/>' +
+      '<circle cx="-27.5" cy="80.8" r="2.4" fill="#5a3a22"/><circle cx="-8" cy="80.5" r="3.1" fill="#5a3a22"/>' +
+      '<circle cx="-27.5" cy="80.8" r="1.2" fill="#120c08"/><circle cx="-8" cy="80.5" r="1.6" fill="#120c08"/>' +
+      '<circle cx="-7" cy="79.4" r=".9" fill="#fff"/>' +
+      '<path d="M-32 80.5 Q-26 76 -20 80 M-14 80 Q-6 74 2 80" fill="none" stroke="#2b1d14" stroke-width="1.8" stroke-linecap="round"/>' +
+      // nose, cheek, lips
+      '<ellipse cx="0" cy="96" rx="7" ry="4.5" fill="#ff9aa8" opacity=".35"/>' +
+      '<path d="M-27 105 Q-18 110 -9 105" fill="none" stroke="#a9525e" stroke-width="2.6" stroke-linecap="round"/>' +
+      '<path d="M-24 108 Q-18 110 -12 108" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="1.6" stroke-linecap="round"/>' +
+      '</g>' +
+      '</g>' +
+      '<g class="syrpose"><g style="transform: scale(.6)">' + syringeSVG(c.skin, c.skinLine) + '</g></g>');
+  }
+
+  document.querySelectorAll('.hand-slot').forEach(function (g) {
+    var d = g.dataset;
+    // sized to her forearm: the hand is about as wide as the wrist and 3/4 of the forearm long
+    g.innerHTML = handBackSVG(+d.x, +d.y, +d.a, 1.55, d.m === '1', '#e8b98e', '#c98c60');
+  });
+
+  var scenes = [document.getElementById('s1'), document.getElementById('s2')];
+  var svgEl = document.getElementById('svg');
+  var rigs = [0, 1].map(function (i) {
+    var host = scenes[i].querySelector('.helper');
+    host.innerHTML = helperSVG(host.dataset.kind);
+    return { host: host, pose: null, from: null, to: null, t0: 0, dur: 1 };
+  });
+
+  // Poses place the hand (x, y) and the syringe angle a (degrees). Blending hand positions keeps
+  // every in-between frame inside the arm's reach, so the arm never has to stretch.
+  var GRIP = 158 * 0.6;              // tip -> hand distance at this scale
+  var SHOT = [{ x: 350, y: 307 }, { x: 361, y: 289 }];   // child's upper arm, puppy's shoulder
+  function restPose() {              // arm hanging relaxed, syringe held low by the hip
+    return { x: HELPER_X - 40, y: 256, a: -110 };
+  }
+  function shotPose(i, back) {       // hand on the line of the needle, `back` px from the skin
+    var a = -60, r = a * Math.PI / 180;
+    return { x: SHOT[i].x + (GRIP + back) * Math.cos(r), y: SHOT[i].y + (GRIP + back) * Math.sin(r), a: a };
+  }
+  function moveTo(i, pose, dur) {
+    var rig = rigs[i];
+    rig.from = rig.pose; rig.to = pose; rig.t0 = performance.now(); rig.dur = dur;
+  }
+  function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+  // Two-bone IK: upper arm and forearm keep their lengths; in this 3/4 view the elbow points back and down.
+  var SHOULDER = { x: HELPER_X - 30, y: 150 }, UPPER = 62, FORE = 58, CUFF = .72;
+  function frame(now) {
+    rigs.forEach(function (rig) {
+      if (rig.to) {
+        var t = Math.min(1, (now - rig.t0) / rig.dur), k = ease(t);
+        rig.pose = {
+          x: rig.from.x + (rig.to.x - rig.from.x) * k,
+          y: rig.from.y + (rig.to.y - rig.from.y) * k,
+          a: rig.from.a + (rig.to.a - rig.from.a) * k
+        };
+        if (t === 1) rig.to = null;
+      }
+      var p = rig.pose, pr = p.a * Math.PI / 180;
+      var tx = p.x - GRIP * Math.cos(pr), ty = p.y - GRIP * Math.sin(pr);
+      rig.host.querySelector('.syrpose').setAttribute('transform', 'translate(' + tx.toFixed(1) + ' ' + ty.toFixed(1) + ') rotate(' + p.a.toFixed(2) + ')');
+
+      var hand = rig.host.querySelector('.hand');
+      var h = new DOMPoint(150, -21).matrixTransform(svgEl.getScreenCTM().inverse().multiply(hand.getScreenCTM()));
+
+      var dx = h.x - SHOULDER.x, dy = h.y - SHOULDER.y;
+      var d = Math.max(UPPER - FORE + 1, Math.min(Math.hypot(dx, dy), UPPER + FORE - 0.5));
+      var a = Math.atan2(dy, dx);
+      var b = Math.acos((UPPER * UPPER + d * d - FORE * FORE) / (2 * UPPER * d));
+      var ex = SHOULDER.x + UPPER * Math.cos(a - b), ey = SHOULDER.y + UPPER * Math.sin(a - b);
+      // the sleeve ends at the cuff; the wrist carries on from inside the cuff into the hand
+      var cx = ex + (h.x - ex) * CUFF, cy = ey + (h.y - ey) * CUFF;
+      var sleeve = 'M' + SHOULDER.x + ' ' + SHOULDER.y + ' L' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ' L' + cx.toFixed(1) + ' ' + cy.toFixed(1);
+      var wr = 'M' + (ex + (h.x - ex) * (CUFF - .05)).toFixed(1) + ' ' + (ey + (h.y - ey) * (CUFF - .05)).toFixed(1) + ' L' + h.x.toFixed(1) + ' ' + h.y.toFixed(1);
+      rig.host.querySelectorAll('.arm .sleeve').forEach(function (el) { el.setAttribute('d', sleeve); });
+      rig.host.querySelectorAll('.arm .wrist').forEach(function (el) { el.setAttribute('d', wr); });
+    });
+    requestAnimationFrame(frame);
+  }
+  var cap = document.getElementById('caption');
+  var timers = [];
+
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function say(text) { cap.textContent = text; }
+  function show(i) {
+    scenes.forEach(function (s, k) { s.classList.toggle('active', k === i); });
+  }
+  function reset() {
+    // snap everything back instantly (no transitions) so the loop restarts cleanly
+    scenes.forEach(function (s) {
+      s.classList.add('snap');
+      s.classList.remove('approach', 'poke', 'done', 'shielded');
+    });
+    void svgEl.getBoundingClientRect();
+    scenes.forEach(function (s) { s.classList.remove('snap'); });
+    rigs.forEach(function (rig) { rig.pose = restPose(); rig.to = null; });
+  }
+  function step(i, cls) {
+    scenes[i].classList.add(cls);
+    if (cls === 'approach') moveTo(i, shotPose(i, 25), 1400);
+    if (cls === 'poke') moveTo(i, shotPose(i, 0), 500);
+    if (cls === 'done') moveTo(i, restPose(), 1300);
+  }
+
+  function play() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    reset();
+    show(0);
+
+    // --- the child ---
+    say('This is Maya. Today is her vaccine day! 💉');
+    at(3500,  function () { say('The doctor uses a tiny, tiny needle.'); step(0, 'approach'); });
+    at(6500,  function () { say('Pinch! It is over super fast.'); step(0, 'poke'); });
+    at(8200,  function () { say('All done! Maya was so brave. A bandage and a sticker! ⭐'); step(0, 'done'); });
+    at(11500, function () { say('The vaccine teaches her body to fight germs, so she stays healthy. 🛡️'); step(0, 'shielded'); });
+
+    // --- the puppy ---
+    at(15500, function () { show(1); say('Dogs need vaccines too! This is Stella, an Australian Shepherd puppy. 🐶'); });
+    at(19000, function () { say('The vet gives Stella a tiny pinch, just like Maya got.'); step(1, 'approach'); });
+    at(22000, function () { say('Yip! Quick pinch...'); step(1, 'poke'); });
+    at(23700, function () { say('All done! Good pup, Stella! A paw-print bandage! 🐾'); step(1, 'done'); });
+    at(27000, function () { say('Now Stella is protected from germs too. 🛡️'); step(1, 'shielded'); });
+
+  }
+
+  document.getElementById('replay').addEventListener('click', play);
+  play();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
