@@ -179,7 +179,7 @@
       <text x="145" y="245" text-anchor="middle" font-size="21" font-weight="bold" fill="#2b3a55">That wasn't so bad!</text></g>
 
     <!-- protected shield -->
-    <g transform="translate(440 115)"><g class="shield">
+    <g transform="translate(140 265)"><g class="shield">
       <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="#4cc38a" stroke="#2c8f61" stroke-width="5"/>
       <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
     </g></g>
@@ -195,8 +195,8 @@
     <circle cx="97" cy="84" r="8" fill="#ff6f91"/><circle cx="115" cy="73" r="8" fill="#ff6f91"/>
     <circle cx="135" cy="73" r="8" fill="#ff6f91"/><circle cx="153" cy="84" r="8" fill="#ff6f91"/>
     <!-- exam table -->
-    <rect x="150" y="372" width="340" height="26" rx="10" fill="#b8c7d6"/>
-    <rect x="190" y="398" width="16" height="40" fill="#8aa0b4"/><rect x="434" y="398" width="16" height="40" fill="#8aa0b4"/>
+    <rect x="150" y="372" width="300" height="26" rx="10" fill="#b8c7d6"/>
+    <rect x="190" y="398" width="16" height="40" fill="#8aa0b4"/><rect x="410" y="398" width="16" height="40" fill="#8aa0b4"/>
 
     <!-- puppy (scaled to sit naturally beside an adult) -->
     <g transform="translate(318 372) scale(.7) translate(-318 -372)">
@@ -278,7 +278,7 @@
     <g class="bub bub-done"><rect x="20" y="215" width="190" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
       <text x="115" y="245" text-anchor="middle" font-size="22" font-weight="bold" fill="#2b3a55">Woof! I'm brave!</text></g>
 
-    <g transform="translate(440 115)"><g class="shield">
+    <g transform="translate(140 265)"><g class="shield">
       <path d="M0 -62 L52 -42 Q52 22 0 62 Q-52 22 -52 -42Z" fill="#4cc38a" stroke="#2c8f61" stroke-width="5"/>
       <path d="M-22 0 L-6 18 L24 -18" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
     </g></g>
@@ -318,7 +318,7 @@
     '<line x1="0" y1="0" x2="27" y2="0" stroke="#8d99a6" stroke-width="3" stroke-linecap="round"/>';
 
   // Adult helper figure, built around x = 0 and placed at HELPER_X.
-  var HELPER_X = 560;
+  var HELPER_X = 505;
   var LOOKS = {
     nurse: { coat: '#ffffff', line: '#b9d3e3', shirt: '#7fd1c7', pants: '#5bbfb3', skin: '#d9a77f', hair: '#2f2a2a' },
     vet:   { coat: '#7fd1c7', line: '#4fa89d', shirt: '#ffffff', pants: '#3b4a66', skin: '#f2c9a0', hair: '#8a5a2b' }
@@ -349,7 +349,7 @@
       '<path d="M-15 129 L-3 190 M15 129 L3 190 M0 168 L0 332" fill="none" stroke="' + c.line + '" stroke-width="3"/>' +
       '<rect x="14" y="245" width="22" height="18" rx="3" fill="none" stroke="' + c.line + '" stroke-width="3"/>' + steth +
       // relaxed far arm: shoulder, slight bend at the elbow, hand at mid-thigh
-      '<g class="idle-arm">' + limb('M38 148 L46 224 L41 292', 18) + '<circle cx="41" cy="298" r="11" fill="' + c.skin + '"/></g>' +
+      '<g class="idle-arm">' + limb('M38 148 L45 208 L41 262', 18) + '<circle cx="41" cy="268" r="11" fill="' + c.skin + '"/></g>' +
       // head
       '<circle cx="-35" cy="84" r="7" fill="' + c.skin + '"/><circle cx="35" cy="84" r="7" fill="' + c.skin + '"/>' +
       '<circle cx="0" cy="80" r="36" fill="' + c.skin + '"/>' +
@@ -376,11 +376,11 @@
   var GRIP = 158 * 0.6;              // tip -> hand distance at this scale
   var SHOT = [{ x: 369, y: 292 }, { x: 361, y: 289 }];   // child's arm, puppy's shoulder
   function restPose() {              // arm hanging relaxed, syringe held low by the hip
-    var a = -82, r = a * Math.PI / 180;
-    return { x: 508 - GRIP * Math.cos(r), y: 297 - GRIP * Math.sin(r), a: a };
+    var a = -95, r = a * Math.PI / 180, hx = HELPER_X - 52, hy = 266;
+    return { x: hx - GRIP * Math.cos(r), y: hy - GRIP * Math.sin(r), a: a };
   }
   function shotPose(i, back) {
-    var a = -30, r = a * Math.PI / 180;
+    var a = -40, r = a * Math.PI / 180;
     return { x: SHOT[i].x + back * Math.cos(r), y: SHOT[i].y + back * Math.sin(r), a: a };
   }
   function moveTo(i, pose, dur) {
@@ -390,7 +390,7 @@
   function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
   // Two-bone IK: upper arm and forearm keep their lengths; the elbow bends downward.
-  var SHOULDER = { x: HELPER_X - 38, y: 148 }, UPPER = 78, FORE = 74;
+  var SHOULDER = { x: HELPER_X - 38, y: 148 }, UPPER = 62, FORE = 58;
   function frame(now) {
     rigs.forEach(function (rig) {
       if (rig.to) {
