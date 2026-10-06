@@ -83,10 +83,10 @@
   .shielded .bub-done { display: none; }
 
   /* syringe moves along its own axis (local +x points back toward the helper) */
-  .syr { transform: translateX(260px); transition: transform 1.4s ease-in-out; }
+  .syr { transform: translateX(170px); transition: transform 1.4s ease-in-out; }
   .approach .syr { transform: translateX(110px); }
   .poke .syr { transform: translateX(0); transition-duration: .5s; }
-  .done .syr { transform: translateX(260px); transition-duration: 1.2s; }
+  .done .syr { transform: translateX(170px); transition-duration: 1.2s; }
   .plunger { transition: transform 1s ease-in; }
   .poke .plunger { transform: translateX(-48px); }
   .liquid { transform-box: fill-box; transform-origin: left center; transition: transform 1s ease-in; }
@@ -170,8 +170,6 @@
       <path d="M0 -5 l2 4 4 .5 -3 3 .8 4.5 -3.8 -2.2 -3.8 2.2 .8 -4.5 -3 -3 4 -.5z" fill="#ffc400"/>
     </g></g>
 
-    <!-- syringe + nurse arm -->
-    <g transform="translate(398 262) rotate(-20)"><g class="syr"><g id="syr1"></g></g></g>
     <!-- nurse -->
     <g>
       <rect x="610" y="150" width="190" height="300" rx="40" fill="#fff" stroke="#b9d3e3" stroke-width="3"/>
@@ -183,6 +181,9 @@
       <circle cx="664" cy="102" r="5" fill="#2b2b2b"/><circle cx="696" cy="102" r="5" fill="#2b2b2b"/>
       <path d="M668 118 Q680 130 692 118" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
     </g>
+    <!-- nurse arm (drawn by script) + syringe -->
+    <g class="arm"><path class="arm-o" fill="none" stroke="#b9d3e3" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><path class="arm-i" fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(398 262) rotate(-20)"><g class="syr"><g id="syr1"></g></g></g>
 
     <!-- speech bubbles -->
     <g class="bub bub-poke"><rect x="120" y="215" width="150" height="46" rx="20" fill="#fff" stroke="#2b3a55" stroke-width="3"/>
@@ -244,8 +245,6 @@
       <circle cx="-5" cy="-3" r="1.6" fill="#ff6f91"/><circle cx="0" cy="-5" r="1.6" fill="#ff6f91"/><circle cx="5" cy="-3" r="1.6" fill="#ff6f91"/>
     </g></g>
 
-    <!-- syringe + vet arm -->
-    <g transform="translate(394 280) rotate(-20)"><g class="syr"><g id="syr2"></g></g></g>
     <!-- vet -->
     <g>
       <rect x="610" y="150" width="190" height="300" rx="40" fill="#7fd1c7" stroke="#4fa89d" stroke-width="3"/>
@@ -257,6 +256,9 @@
       <circle cx="664" cy="102" r="5" fill="#2b2b2b"/><circle cx="696" cy="102" r="5" fill="#2b2b2b"/>
       <path d="M668 118 Q680 130 692 118" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
     </g>
+    <!-- vet arm (drawn by script) + syringe -->
+    <g class="arm"><path class="arm-o" fill="none" stroke="#4fa89d" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><path class="arm-i" fill="none" stroke="#7fd1c7" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(394 280) rotate(-20)"><g class="syr"><g id="syr2"></g></g></g>
 
     <!-- hearts -->
     <g class="hearts" fill="#ff6f91">
@@ -303,8 +305,7 @@
   var syringe =
     '<g class="plunger"><rect x="104" y="-3" width="46" height="6" fill="#9aa8b5"/>' +
     '<rect x="98" y="-9" width="6" height="18" fill="#6f7f8f"/><rect x="148" y="-13" width="6" height="26" rx="2" fill="#6f7f8f"/>' +
-    '<line x1="154" y1="0" x2="420" y2="0" stroke="#fff" stroke-width="30" stroke-linecap="round"/>' +
-    '<circle cx="158" cy="0" r="15" fill="#e0b48c"/></g>' +
+    '<circle class="hand" cx="158" cy="0" r="15" fill="#e0b48c"/></g>' +
     '<rect x="34" y="-11" width="68" height="22" rx="4" fill="#eaf6ff" stroke="#5b7388" stroke-width="2.5"/>' +
     '<rect class="liquid" x="38" y="-7" width="60" height="14" fill="#ff6fa5"/>' +
     '<rect x="94" y="-14" width="5" height="28" rx="2" fill="#5b7388"/>' +
@@ -314,6 +315,29 @@
   document.getElementById('syr2').innerHTML = syringe;
 
   var scenes = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+
+  // Bend each helper's arm from a fixed shoulder to the moving hand (simple two-bone IK).
+  var svgEl = document.getElementById('svg');
+  var SHOULDER = { x: 634, y: 190 }, BONE = 95;
+  function drawArms() {
+    [scenes[0], scenes[1]].forEach(function (sc) {
+      var hand = sc.querySelector('.hand');
+      var m = svgEl.getScreenCTM().inverse().multiply(hand.getScreenCTM());
+      var h = new DOMPoint(158, 0).matrixTransform(m);
+      var dx = h.x - SHOULDER.x, dy = h.y - SHOULDER.y;
+      var d = Math.min(Math.hypot(dx, dy), BONE * 2 - 1);
+      var a = Math.atan2(dy, dx), bend = Math.acos(d / (BONE * 2));
+      // elbow hangs below the shoulder-hand line
+      var ex = SHOULDER.x + BONE * Math.cos(a - bend), ey = SHOULDER.y + BONE * Math.sin(a - bend);
+      if (ey < SHOULDER.y + BONE * Math.sin(a + bend)) {
+        ex = SHOULDER.x + BONE * Math.cos(a + bend); ey = SHOULDER.y + BONE * Math.sin(a + bend);
+      }
+      var path = 'M' + SHOULDER.x + ' ' + SHOULDER.y + ' L' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ' L' + h.x.toFixed(1) + ' ' + h.y.toFixed(1);
+      sc.querySelectorAll('.arm path').forEach(function (p) { p.setAttribute('d', path); });
+    });
+    requestAnimationFrame(drawArms);
+  }
+  requestAnimationFrame(drawArms);
   var cap = document.getElementById('caption');
   var timers = [];
 
