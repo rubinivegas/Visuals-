@@ -159,6 +159,17 @@
     <!-- props -->
     <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ee6b2"/><stop offset="1" stop-color="#2b9462"/></linearGradient>
     <linearGradient id="bandGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe4ec"/><stop offset="1" stop-color="#f5b9ca"/></linearGradient>
+    <!-- fuzzy edges for fur and hair -->
+    <filter id="fuzzy" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="fuzzySoft" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd6f7"/><stop offset="1" stop-color="#e3f4fd"/></linearGradient>
+    <linearGradient id="lightBeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe8" stop-opacity=".55"/><stop offset="1" stop-color="#fffbe8" stop-opacity="0"/></linearGradient>
   </defs>
 
   <!-- ================= SCENE 1: CHILD ================= -->
@@ -168,6 +179,15 @@
     <rect y="385" width="800" height="65" fill="url(#planks)"/>
     <rect y="385" width="800" height="65" fill="url(#floorShade)"/>
     <rect y="374" width="800" height="12" fill="#ffffff"/><rect y="384" width="800" height="2" fill="#c9b08a" opacity=".6"/>
+    <!-- window and daylight -->
+    <g filter="url(#softShadow)">
+      <rect x="600" y="48" width="150" height="170" rx="6" fill="#ffffff"/>
+      <rect x="610" y="58" width="130" height="150" fill="url(#sky)"/>
+      <ellipse cx="650" cy="110" rx="26" ry="10" fill="#fff" opacity=".85"/><ellipse cx="672" cy="104" rx="18" ry="9" fill="#fff" opacity=".85"/>
+      <path d="M675 58 V208 M610 133 H740" stroke="#ffffff" stroke-width="6"/>
+      <rect x="592" y="214" width="166" height="10" rx="3" fill="#f4f7f9"/>
+    </g>
+    <path d="M610 224 L740 224 L660 450 L430 450Z" fill="url(#lightBeam)"/>
     <!-- wall poster -->
     <rect x="60" y="50" width="130" height="100" rx="10" fill="url(#paper)" stroke="#9fc5da" stroke-width="4" filter="url(#softShadow)"/>
     <rect x="113" y="68" width="24" height="64" rx="5" fill="url(#pinkGloss)"/>
@@ -183,7 +203,9 @@
     <g transform="translate(300 362) scale(.7) translate(-300 -362)">
     <g class="breathe">
       <!-- long hair behind her shoulders -->
-      <path d="M246 176 Q234 250 258 270 Q300 284 342 270 Q366 250 354 176Z" fill="url(#hairChild)"/>
+      <g transform="translate(300 232) scale(.82) translate(-300 -232)">
+        <path d="M246 176 Q234 250 258 270 Q300 284 342 270 Q366 250 354 176Z" fill="url(#hairChild)" filter="url(#fuzzySoft)"/>
+      </g>
       <!-- legs and Mary Jane shoes -->
       <rect x="262" y="350" width="34" height="62" rx="14" fill="url(#skinChild)"/>
       <rect x="306" y="350" width="34" height="62" rx="14" fill="url(#skinChild)"/>
@@ -202,37 +224,57 @@
       <!-- other arm: hangs from the shoulder, elbow bent, hand resting on the lap -->
       <path d="M250 258 L228 318 L262 350" fill="none" stroke="#e8b98e" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M248 262 L231 316 L258 342" fill="none" stroke="#fbdcbc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
-      <circle cx="264" cy="351" r="12" fill="url(#skinChild)"/>
+      <circle cx="264" cy="351" r="12" fill="url(#skinChild)"/><path d="M258 356 Q264 360 270 356 M259 352 Q264 355 269 352" fill="none" stroke="#cf9468" stroke-width="1.2"/>
       <path d="M257 250 L249 264" stroke="#f590b3" stroke-width="32" stroke-linecap="round"/>
       <!-- vaccinated arm: same pose, sleeve rolled up to show the upper arm -->
       <path d="M350 258 L372 318 L338 350" fill="none" stroke="#e8b98e" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M347 262 L366 316 L340 342" fill="none" stroke="#fbdcbc" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/>
-      <circle cx="336" cy="351" r="12" fill="url(#skinChild)"/>
+      <circle cx="336" cy="351" r="12" fill="url(#skinChild)"/><path d="M330 356 Q336 360 342 356 M331 352 Q336 355 341 352" fill="none" stroke="#cf9468" stroke-width="1.2"/>
       <path d="M343 250 L351 262" stroke="#f590b3" stroke-width="32" stroke-linecap="round"/>
       <path d="M337.9 270.2 L366.1 259.8" stroke="#d9608a" stroke-width="7" stroke-linecap="round"/>
       <!-- head -->
       <rect x="290" y="226" width="20" height="14" fill="#e3b287"/>
-      <circle cx="300" cy="185" r="50" fill="url(#skinChild)"/>
+      <g transform="translate(300 232) scale(.82) translate(-300 -232)">
+      <!-- ears peek out at the sides; wide forehead, full cheeks, small rounded chin -->
+      <ellipse cx="250" cy="192" rx="7" ry="11" fill="#e8b98e"/><ellipse cx="350" cy="192" rx="7" ry="11" fill="#e8b98e"/>
+      <path d="M300 135 Q350 135 352 182 Q353 206 340 222 Q324 238 300 238 Q276 238 260 222 Q247 206 248 182 Q250 135 300 135Z" fill="url(#skinChild)"/>
+      <path d="M252 196 Q254 214 266 226 Q282 238 300 238 Q276 236 262 220 Q250 206 252 196Z" fill="#000" opacity=".06"/>
+      <path d="M348 196 Q346 214 334 226 Q318 238 300 238 Q324 236 338 220 Q350 206 348 196Z" fill="#000" opacity=".06"/>
+
       <!-- bangs and side locks -->
-      <path d="M250 184 Q246 128 300 129 Q354 128 350 184 Q344 160 332 154 Q326 170 306 164 Q296 172 282 160 Q264 162 250 184Z" fill="url(#hairChild)"/>
-      <path d="M250 176 Q242 222 252 256 Q262 244 264 206Z" fill="url(#hairChild)"/>
-      <path d="M350 176 Q358 222 348 256 Q338 244 336 206Z" fill="url(#hairChild)"/>
-      <path d="M270 140 Q284 134 296 138 M312 137 Q326 136 336 144 M256 200 Q254 226 256 244 M344 200 Q346 226 344 244" fill="none" stroke="#b07a4c" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+      <g filter="url(#fuzzySoft)">
+        <path d="M250 184 Q246 128 300 129 Q354 128 350 184 Q344 160 332 154 Q326 170 306 164 Q296 172 282 160 Q264 162 250 184Z" fill="url(#hairChild)"/>
+        <path d="M250 176 Q242 222 252 256 Q262 244 264 206Z" fill="url(#hairChild)"/>
+        <path d="M350 176 Q358 222 348 256 Q338 244 336 206Z" fill="url(#hairChild)"/>
+      </g>
+      <path d="M270 140 Q284 134 296 138 M312 137 Q326 136 336 144 M256 200 Q254 226 256 244 M344 200 Q346 226 344 244 M262 150 Q272 142 282 146" fill="none" stroke="#b07a4c" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>
       <!-- bow -->
       <g transform="translate(336 142) rotate(18)">
         <path d="M0 0 L-18 -11 L-18 11Z" fill="url(#pinkGloss)"/><path d="M0 0 L18 -11 L18 11Z" fill="url(#pinkGloss)"/>
         <circle r="5" fill="#e8537a"/><path d="M-14 -6 L-6 -2" stroke="#fff" stroke-width="2" opacity=".6" stroke-linecap="round"/>
       </g>
-      <circle cx="274" cy="205" r="7" fill="#ff9aa8" opacity=".6"/><circle cx="326" cy="205" r="7" fill="#ff9aa8" opacity=".6"/>
-      <g class="eyes-open"><circle cx="284" cy="186" r="6" fill="#2b2b2b"/><circle cx="316" cy="186" r="6" fill="#2b2b2b"/>
-        <circle cx="286" cy="184" r="2" fill="#fff"/><circle cx="318" cy="184" r="2" fill="#fff"/>
-        <path d="M279 181 L274 177 M281 179 L278 174 M321 181 L326 177 M319 179 L322 174" stroke="#2b2b2b" stroke-width="2" stroke-linecap="round"/></g>
-      <g class="eyes-squint" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round">
-        <path d="M277 181 L289 187 L277 193"/><path d="M323 181 L311 187 L323 193"/></g>
-      <path class="m-idle" d="M288 208 Q300 218 312 208" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
-      <path class="m-worry" d="M289 212 Q300 205 311 212" fill="none" stroke="#2b2b2b" stroke-width="3.5" stroke-linecap="round"/>
-      <ellipse class="m-ouch" cx="300" cy="211" rx="8" ry="10" fill="#8a2b3a"/>
-      <g class="m-happy"><path d="M282 204 Q300 232 318 204Z" fill="#8a2b3a"/><path d="M289 214 Q300 222 311 214 Q300 211 289 214Z" fill="#ff7a8a"/></g>
+      <!-- brows, nose, cheeks -->
+      <path d="M275 172 Q284 167 293 171 M307 171 Q316 167 325 172" fill="none" stroke="#6b4429" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M301 190 Q299 198 296 202 Q300 205 305 202" fill="none" stroke="#cf9468" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="274" cy="204" rx="8" ry="5" fill="#ff9aa8" opacity=".45"/><ellipse cx="326" cy="204" rx="8" ry="5" fill="#ff9aa8" opacity=".45"/>
+      <!-- eyes: whites, brown irises, lids and lashes -->
+      <g class="eyes-open">
+        <path d="M275 186 Q284 178 293 186 Q284 192 275 186Z" fill="#fff" stroke="#8a6a55" stroke-width=".8"/>
+        <path d="M307 186 Q316 178 325 186 Q316 192 307 186Z" fill="#fff" stroke="#8a6a55" stroke-width=".8"/>
+        <circle cx="284" cy="185.5" r="4.4" fill="#7a5130"/><circle cx="316" cy="185.5" r="4.4" fill="#7a5130"/>
+        <circle cx="284" cy="185.5" r="2.1" fill="#1a110b"/><circle cx="316" cy="185.5" r="2.1" fill="#1a110b"/>
+        <circle cx="285.5" cy="184" r="1.2" fill="#fff"/><circle cx="317.5" cy="184" r="1.2" fill="#fff"/>
+        <path d="M274 185 Q284 176 294 184 M306 184 Q316 176 326 185" fill="none" stroke="#2b1d14" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M275 184 L271 181 M277 181 L274 177 M325 184 L329 181 M323 181 L326 177" stroke="#2b1d14" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <g class="eyes-squint" fill="none" stroke="#2b1d14" stroke-width="2.6" stroke-linecap="round">
+        <path d="M276 182 L290 187 L276 192"/><path d="M324 182 L310 187 L324 192"/></g>
+      <!-- lips -->
+      <path class="m-idle" d="M290 211 Q300 218 310 211" fill="none" stroke="#c4606e" stroke-width="3" stroke-linecap="round"/>
+      <path class="m-worry" d="M291 214 Q300 208 309 214" fill="none" stroke="#c4606e" stroke-width="3" stroke-linecap="round"/>
+      <ellipse class="m-ouch" cx="300" cy="213" rx="6" ry="8" fill="#7a2733" stroke="#c4606e" stroke-width="2"/>
+      <g class="m-happy"><path d="M286 207 Q300 226 314 207Z" fill="#7a2733" stroke="#c4606e" stroke-width="2" stroke-linejoin="round"/><path d="M288 208 H312 L310 212 H290Z" fill="#fff"/><path d="M292 216 Q300 222 308 216 Q300 214 292 216Z" fill="#ff8a96"/></g>
+      </g>
     </g>
 
     <!-- bandage on arm -->
@@ -267,6 +309,15 @@
     <rect y="385" width="800" height="65" fill="url(#planks)"/>
     <rect y="385" width="800" height="65" fill="url(#floorShade)"/>
     <rect y="374" width="800" height="12" fill="#ffffff"/><rect y="384" width="800" height="2" fill="#c9b08a" opacity=".6"/>
+    <!-- window and daylight -->
+    <g filter="url(#softShadow)">
+      <rect x="600" y="48" width="150" height="170" rx="6" fill="#ffffff"/>
+      <rect x="610" y="58" width="130" height="150" fill="url(#sky)"/>
+      <ellipse cx="650" cy="110" rx="26" ry="10" fill="#fff" opacity=".85"/><ellipse cx="672" cy="104" rx="18" ry="9" fill="#fff" opacity=".85"/>
+      <path d="M675 58 V208 M610 133 H740" stroke="#ffffff" stroke-width="6"/>
+      <rect x="592" y="214" width="166" height="10" rx="3" fill="#f4f7f9"/>
+    </g>
+    <path d="M610 224 L740 224 L660 450 L430 450Z" fill="url(#lightBeam)"/>
     <!-- poster: paw -->
     <rect x="60" y="50" width="130" height="100" rx="10" fill="url(#paper)" stroke="#9fd0ab" stroke-width="4" filter="url(#softShadow)"/>
     <ellipse cx="125" cy="108" rx="20" ry="16" fill="url(#pinkGloss)"/>
@@ -306,9 +357,9 @@
     <!-- soft shadow on the table -->
     <ellipse cx="318" cy="378" rx="92" ry="10" fill="#000" opacity=".14"/>
     <g>
-      <path class="tail" d="M250 330 Q206 346 186 322 Q176 304 192 296 Q204 318 252 312Z" fill="url(#stBlack)"/>
+      <path class="tail" d="M250 330 Q206 346 186 322 Q176 304 192 296 Q204 318 252 312Z" fill="url(#stBlack)" filter="url(#fuzzy)"/>
       <g class="breathe">
-        <ellipse cx="318" cy="305" rx="88" ry="72" fill="url(#stBlack)"/>
+        <ellipse cx="318" cy="305" rx="88" ry="72" fill="url(#stBlack)" filter="url(#fuzzy)"/>
         <ellipse cx="318" cy="305" rx="88" ry="72" fill="url(#stFur)"/>
         <!-- tan along the sides of the chest, fluffy white bib down the middle -->
         <path d="M268 262 Q318 248 368 262 Q376 300 360 332 Q318 350 276 332 Q260 300 268 262Z" fill="url(#stTan)"/>
@@ -322,17 +373,17 @@
         <path d="M279 372 L279 380 M291 372 L291 380 M345 372 L345 380 M357 372 L357 380" stroke="#cfc6b6" stroke-width="1.6" stroke-linecap="round"/>
       </g>
       <!-- head with fluffy cheek tufts -->
-      <path d="M262 196 L250 206 L262 210 L252 222 L266 222 M370 196 L382 206 L370 210 L380 222 L366 222" fill="#23262b" stroke="#23262b" stroke-width="6" stroke-linejoin="round"/>
-      <circle cx="316" cy="190" r="60" fill="url(#stBlack)"/>
+      <path d="M262 196 L250 206 L262 210 L252 222 L266 222 M370 196 L382 206 L370 210 L380 222 L366 222" fill="#23262b" stroke="#23262b" stroke-width="6" stroke-linejoin="round" filter="url(#fuzzy)"/>
+      <circle cx="316" cy="190" r="60" fill="url(#stBlack)" filter="url(#fuzzy)"/>
       <circle cx="316" cy="190" r="60" fill="url(#stFur)"/>
       <!-- folded ears: short upright base, then the flap tips over and hangs beside the face -->
-      <g class="ear-l">
+      <g class="ear-l" filter="url(#fuzzySoft)">
         <path d="M264 162 L300 140 L286 110 L254 120Z" fill="#23262b"/>
         <path d="M268 152 L292 140 L282 120 L262 128Z" fill="url(#stTan)"/>
         <path d="M254 120 Q270 104 286 110 Q284 148 252 188 Q236 180 236 154 Q238 132 254 120Z" fill="url(#stFlap)"/>
         <path d="M256 121 Q270 108 284 112" fill="none" stroke="#5b616b" stroke-width="2" stroke-linecap="round"/>
       </g>
-      <g class="ear-r">
+      <g class="ear-r" filter="url(#fuzzySoft)">
         <path d="M368 162 L332 140 L346 110 L378 120Z" fill="#23262b"/>
         <path d="M364 152 L340 140 L350 120 L370 128Z" fill="url(#stTan)"/>
         <path d="M378 120 Q362 104 346 110 Q348 148 380 188 Q396 180 396 154 Q394 132 378 120Z" fill="url(#stFlap)"/>
@@ -344,7 +395,9 @@
       <ellipse cx="316" cy="219" rx="25" ry="19" fill="url(#stTan)"/>
       <ellipse cx="316" cy="211" rx="15" ry="11" fill="#33373d"/>
       <ellipse cx="316" cy="232" rx="13" ry="7" fill="#d9d2c6"/>
-      <ellipse cx="316" cy="205" rx="10" ry="7" fill="#0f1012"/>
+      <path d="M305 201 Q316 195 327 201 Q327 209 316 213 Q305 209 305 201Z" fill="#0f1012"/>
+      <ellipse cx="311" cy="206" rx="2.6" ry="1.6" fill="#000"/><ellipse cx="321" cy="206" rx="2.6" ry="1.6" fill="#000"/>
+      <path d="M316 209 V214" stroke="#000" stroke-width="1.4"/>
       <ellipse cx="312" cy="202" rx="3.5" ry="2" fill="#fff" opacity=".45"/>
       <!-- blue collar -->
       <path d="M262 236 Q316 268 370 236" fill="none" stroke="#5aa0e6" stroke-width="13" stroke-linecap="round"/>
@@ -461,16 +514,39 @@
       '<path d="M-24 129 L-16 188 M2 129 L-8 188 M-12 164 L-12 332" fill="none" stroke="' + c.line + '" stroke-width="3"/>' +
       '<rect x="8" y="245" width="22" height="18" rx="3" fill="none" stroke="' + c.line + '" stroke-width="3"/>' + steth +
       '<g class="idle-arm">' + limb(nearArm, 18) + '<circle cx="31" cy="275" r="11.4" fill="' + c.skinFill + '"/></g>' +
-      // head turned toward the patient
-      '<circle cx="24" cy="86" r="7" fill="' + c.skinFill + '"/>' +
-      '<circle cx="-4" cy="80" r="36" fill="' + c.skinFill + '"/>' +
-      '<circle cx="-39" cy="88" r="5" fill="' + c.skinFill + '"/>' +
+      // head turned toward the patient, scaled to adult proportions (about 6.5 heads tall)
+      '<g transform="translate(-5 116) scale(.8) translate(5 -116)">' +
+      // skull, forehead, brow, cheekbone, then the jaw tapering to the chin
+      '<path d="M0 42 Q34 42 36 72 Q37 92 22 104 Q8 114 -14 117 Q-26 117 -30 110 Q-35 101 -36 92 Q-38 84 -36 77 Q-38 70 -35 62 Q-28 42 0 42Z" fill="' + c.skinFill + '"/>' +
+      // nose bridge and tip break the profile line
+      '<path d="M-35 78 Q-40 90 -39.5 94.5 Q-37 98.5 -31 97 L-30 86Z" fill="' + c.skinFill + '"/>' +
+      // shading: far side of the face, under the cheekbone, under the jaw
+      '<path d="M18 58 Q36 70 35 88 Q32 100 22 104 Q8 113 -6 116 Q14 100 18 58Z" fill="#000" opacity=".09"/>' +
+      '<path d="M-30 96 Q-24 106 -12 108" fill="none" stroke="#000" stroke-opacity=".07" stroke-width="4" stroke-linecap="round"/>' +
+      '<g filter="url(#fuzzySoft)">' +
       '<path d="M-38 70 Q-36 40 -4 41 Q34 40 34 80 Q34 96 26 104 Q28 80 18 66 Q-8 58 -38 70Z" fill="' + c.hairFill + '"/>' +
+      (kind === 'nurse' ? '<circle cx="26" cy="60" r="13" fill="' + c.hairFill + '"/>' : '') +
+      '</g>' +
       '<path d="M-26 52 Q-8 46 12 52 M-30 60 Q-14 54 4 58 M20 60 Q28 72 28 88" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2" stroke-linecap="round"/>' + cap +
-      '<circle cx="24" cy="86" r="7" fill="' + c.skinFill + '"/>' +
-      '<ellipse cx="-26" cy="82" rx="3.5" ry="4.5" fill="#2b2b2b"/><circle cx="-6" cy="82" r="4.5" fill="#2b2b2b"/>' +
-      '<circle cx="2" cy="95" r="5.5" fill="#ff9aa8" opacity=".5"/>' +
-      '<path d="M-26 97 Q-18 104 -10 97" fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"/>' +
+      // ear with inner fold
+      '<ellipse cx="24" cy="86" rx="6" ry="9" fill="' + c.skinFill + '"/>' +
+      '<path d="M22 81 Q27 86 22 92" fill="none" stroke="#000" stroke-opacity=".18" stroke-width="1.6" stroke-linecap="round"/>' +
+      // brows
+      '<path d="M-33 73 Q-27 70 -21 72 M-13 72 Q-6 68 2 72" fill="none" stroke="' + c.hair + '" stroke-width="2.6" stroke-linecap="round"/>' +
+      // eyes: far eye narrower; irises look toward the patient
+      '<path d="M-31 81 Q-26 77 -21 81 Q-26 84 -31 81Z" fill="#fff"/>' +
+      '<path d="M-13 81 Q-6 75 1 81 Q-6 85 -13 81Z" fill="#fff"/>' +
+      '<circle cx="-27.5" cy="80.8" r="2.4" fill="#5a3a22"/><circle cx="-8" cy="80.5" r="3.1" fill="#5a3a22"/>' +
+      '<circle cx="-27.5" cy="80.8" r="1.2" fill="#120c08"/><circle cx="-8" cy="80.5" r="1.6" fill="#120c08"/>' +
+      '<circle cx="-7" cy="79.4" r=".9" fill="#fff"/>' +
+      '<path d="M-32 80.5 Q-26 76 -20 80 M-14 80 Q-6 74 2 80" fill="none" stroke="#2b1d14" stroke-width="1.8" stroke-linecap="round"/>' +
+      // nose, cheek, lips
+      '<path d="M-31 97 Q-27 99 -22 96" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="1.8" stroke-linecap="round"/>' +
+      '<path d="M-22 80 Q-24 88 -26 92" fill="none" stroke="#000" stroke-opacity=".1" stroke-width="2" stroke-linecap="round"/>' +
+      '<ellipse cx="0" cy="96" rx="7" ry="4.5" fill="#ff9aa8" opacity=".35"/>' +
+      '<path d="M-27 105 Q-18 110 -9 105" fill="none" stroke="#a9525e" stroke-width="2.6" stroke-linecap="round"/>' +
+      '<path d="M-24 108 Q-18 110 -12 108" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="1.6" stroke-linecap="round"/>' +
+      '</g>' +
       '</g>' +
       '<g class="syrpose"><g style="transform: scale(.6)">' + syringe + '</g></g>');
   }
